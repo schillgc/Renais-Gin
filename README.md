@@ -6,8 +6,6 @@
 
 A transformative Django web application that turns premium gin consumption into a global sustainability movement. Renais Gin combines blockchain technology, AI validation, and community engagement to create a participatory ecosystem where every bottle purchase contributes to positive global impact.
 
-![Renais Gin Dashboard](https://via.placeholder.com/800x400/2c3e50/ffffff?text=Renais+Gin+Dashboard)
-
 ## 🌟 Vision
 
 > "We don't sell gin. We sell a key. A key to a locked room in the human spirit where the desire to create, to connect, and to leave things better than we found it resides."
