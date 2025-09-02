@@ -1,14 +1,13 @@
-import os
 import hashlib
 import json
+import os
 from datetime import datetime
-from django.db import models
-from django.conf import settings
+from io import BytesIO
+
+import qrcode
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-import qrcode
-from io import BytesIO
-from PIL import Image
+from django.db import models
 from django.utils import timezone
 
 
