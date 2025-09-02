@@ -45,7 +45,7 @@ A transformative Django web application that turns premium gin consumption into 
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/your-username/renais-gin.git
+git clone https://github.com/schillgc/renais-gin.git
 cd renais-gin
 ```
 
