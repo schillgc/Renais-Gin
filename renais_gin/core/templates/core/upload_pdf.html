@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload PDF - Renais Gin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="renais-card card">
+            <div class="card-header">
+                <h2 class="card-title text-center">Upload PDF Document</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Document Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                        <div class="text-danger">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.pdf_file.id_for_label }}" class="form-label">PDF File</label>
+                        {{ form.pdf_file }}
+                        {% if form.pdf_file.errors %}
+                        <div class="text-danger">{{ form.pdf_file.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Maximum file size: 10MB. Only PDF files are accepted.</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn renais-btn-primary btn-lg">Upload PDF</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="renais-card card mt-4">
+            <div class="card-body">
+                <h4 class="card-title">Why Upload PDFs?</h4>
+                <ul class="list-unstyled">
+                    <li>✓ Provide evidence for your impact pledges</li>
+                    <li>✓ Share documentation of community projects</li>
+                    <li>✓ Submit receipts for sustainability initiatives</li>
+                    <li>✓ Enhance the verification process for rebates</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

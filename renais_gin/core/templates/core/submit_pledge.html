@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Make Pledge - Renais Gin{% endblock %}
+
+{% block content %}
+<!-- Progress indicator -->
+<div class="row justify-content-center mb-4">
+    <div class="col-md-8">
+        <div class="pledge-progress">
+            <div class="pledge-progress-bar"></div>
+        </div>
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="number-circle completed">✓</div>
+                <h5>Register Bottle</h5>
+            </div>
+            <div class="col-md-4">
+                <div class="number-circle active">2</div>
+                <h5>Make Pledge</h5>
+            </div>
+            <div class="col-md-4">
+                <div class="number-circle">3</div>
+                <h5>Get Rebate</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="renais-card card">
+            <div class="card-header">
+                <h2 class="card-title text-center">Make a Pledge for Bottle {{ bottle.bottle_id }}</h2>
+                <p class="text-center text-muted mb-0">Complete your registration with a commitment to better your world</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5>How It Works</h5>
+                    <ol>
+                        <li>Submit your pledge to make a positive impact</li>
+                        <li>Our AI validates your pledge's authenticity</li>
+                        <li>The community reviews and approves your pledge</li>
+                        <li>Receive your $5 rebate after approval</li>
+                    </ol>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="pledge_text" class="form-label">Your Pledge</label>
+                        <textarea class="form-control" id="pledge_text" name="pledge_text" rows="4"
+                                  placeholder="I pledge to use this rebate to..." required></textarea>
+                        <div class="form-text">Describe how you'll use the $5 rebate to better your corner of the world</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="impact_plan" class="form-label">Impact Plan</label>
+                        <textarea class="form-control" id="impact_plan" name="impact_plan" rows="3"
+                                  placeholder="I'll accomplish this by..." required></textarea>
+                        <div class="form-text">Explain how you'll implement your pledge</div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn renais-btn-primary btn-lg">Submit Pledge & Complete Registration</button>
+                        <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary ms-2">Skip for Now</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="renais-card card mt-4">
+            <div class="card-body">
+                <h4 class="card-title">Pledge Examples</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6>Environmental</h6>
+                                <p class="card-text">"I'll plant native trees in my local park to support biodiversity."</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6>Community</h6>
+                                <p class="card-text">"I'll donate school supplies to underprivileged children in my community."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
