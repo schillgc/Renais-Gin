@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Internal Server Error - Renais Gin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1 class="display-1">500</h1>
+        <p class="lead">The server encountered an error.</p>
+        <a href="{% url 'core:dashboard' %}" class="btn renais-btn-primary">
+            Return to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
