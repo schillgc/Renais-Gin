@@ -1,4 +1,4 @@
-Django==5.2.5
+Django==5.2.6
 Pillow==11.3.0
 qrcode==8.2
 web3==7.13.0
