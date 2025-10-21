@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Craft Your Perfect World</h1>
+                <p class="lead">We don't sell gin. We sell a key. A key to a locked room in the human spirit where the desire to create, to connect, and to leave things better than we found it resides.</p>
+                {% if not user.is_authenticated %}
+                <div class="mt-4">
+                    <a href="{% url 'register' %}" class="btn btn-light btn-lg me-3">Join the Movement</a>
+                    <a href="{% url 'about' %}" class="btn btn-outline-light btn-lg">Learn More</a>
+                </div>
+                {% else %}
+                <div class="mt-4">
+                    <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg me-3">Go to Dashboard</a>
+                    <a href="{% url 'bottles' %}" class="btn btn-outline-light btn-lg">Register Bottle</a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="/static/images/gin-bottle.png" alt="Renais Gin Bottle" class="img-fluid" style="max-height: 400px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col">
+                <h2 class="display-5">How It Works</h2>
+                <p class="lead">Transform your gin experience into positive global impact</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-qrcode fa-3x text-primary"></i>
+                        </div>
+                        <h4>Scan QR Code</h4>
+                        <p>Every Renais Gin bottle features a unique QR code that connects physical products to digital experiences.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-hand-holding-heart fa-3x text-success"></i>
+                        </div>
+                        <h4>Make a Pledge</h4>
+                        <p>Submit your commitment to positive impact and join our community of change-makers.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-dollar-sign fa-3x text-warning"></i>
+                        </div>
+                        <h4>Earn Rewards</h4>
+                        <p>Receive $5 rebates when your pledges are validated by our community and AI systems.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Impact Stats -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="impact-stat">
+                    <h3 class="display-4 text-primary fw-bold" id="totalPledges">0</h3>
+                    <p class="lead">Pledges Made</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="impact-stat">
+                    <h3 class="display-4 text-success fw-bold" id="totalRebates">0</h3>
+                    <p class="lead">Rebates Given</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="impact-stat">
+                    <h3 class="display-4 text-info fw-bold" id="communitySize">0</h3>
+                    <p class="lead">Community Members</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="impact-stat">
+                    <h3 class="display-4 text-warning fw-bold" id="globalReach">0</h3>
+                    <p class="lead">Countries Reached</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animate statistics
+function animateCounter(element, target) {
+    let current = 0;
+    const increment = target / 100;
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            element.textContent = target.toLocaleString();
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current).toLocaleString();
+        }
+    }, 20);
+}
+
+// Load impact statistics (mock data for now)
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        animateCounter(document.getElementById('totalPledges'), 1250);
+        animateCounter(document.getElementById('totalRebates'), 8750);
+        animateCounter(document.getElementById('communitySize'), 3200);
+        animateCounter(document.getElementById('globalReach'), 45);
+    }, 500);
+});
+</script>
+{% endblock %}

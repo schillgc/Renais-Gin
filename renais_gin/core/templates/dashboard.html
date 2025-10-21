@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Renais Gin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Your Dashboard</h1>
+            <p class="lead">Welcome back! Here's your impact overview.</p>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h3 class="stat-number" id="karma-score">0</h3>
+                    <p class="card-text">Karma Score</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h3 class="stat-number" id="total-pledges">0</h3>
+                    <p class="card-text">Total Pledges</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h3 class="stat-number" id="approved-pledges">0</h3>
+                    <p class="card-text">Approved Pledges</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h3 class="stat-number" id="total-rebates">$0</h3>
+                    <p class="card-text">Total Rebates</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'bottles' %}" class="btn btn-primary w-100 py-3">
+                                <i class="fas fa-qrcode fa-2x mb-2"></i><br>
+                                Register Bottle
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'karma' %}" class="btn btn-success w-100 py-3">
+                                <i class="fas fa-hand-holding-heart fa-2x mb-2"></i><br>
+                                Submit Pledge
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="#" class="btn btn-info w-100 py-3">
+                                <i class="fas fa-chart-line fa-2x mb-2"></i><br>
+                                View Impact
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Recent Bottles</h4>
+                </div>
+                <div class="card-body">
+                    <div id="recent-bottles">
+                        <p class="text-muted">No recent bottles</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Recent Pledges</h4>
+                </div>
+                <div class="card-body">
+                    <div id="recent-pledges">
+                        <p class="text-muted">No recent pledges</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load dashboard data
+    loadDashboardData();
+});
+
+function loadDashboardData() {
+    // Load user stats
+    fetch('/api/auth/stats/')
+    .then(response => response.json())
+    .then(stats => {
+        document.getElementById('karma-score').textContent = stats.karma_score || 0;
+        document.getElementById('total-pledges').textContent = stats.total_pledges || 0;
+        document.getElementById('approved-pledges').textContent = stats.approved_pledges || 0;
+        document.getElementById('total-rebates').textContent = '$' + (stats.total_rebates || 0);
+    });
+
+    // Load recent bottles
+    fetch('/api/bottles/my-bottles/')
+    .then(response => response.json())
+    .then(bottles => {
+        const container = document.getElementById('recent-bottles');
+        if (bottles.length === 0) {
+            container.innerHTML = '<p class="text-muted">No bottles registered yet.</p>';
+        } else {
+            let html = '';
+            bottles.slice(0, 3).forEach(bottle => {
+                html += `
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                        <div>
+                            <strong>${bottle.bottle_id}</strong><br>
+                            <small class="text-muted">${bottle.batch.region}</small>
+                        </div>
+                        <span class="badge ${bottle.is_registered ? 'bg-success' : 'bg-warning'}">
+                            ${bottle.is_registered ? 'Registered' : 'Pending'}
+                        </span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+    });
+
+    // Load recent pledges
+    fetch('/api/karma/pledges/')
+    .then(response => response.json())
+    .then(pledges => {
+        const container = document.getElementById('recent-pledges');
+        if (pledges.length === 0) {
+            container.innerHTML = '<p class="text-muted">No pledges submitted yet.</p>';
+        } else {
+            let html = '';
+            pledges.slice(0, 3).forEach(pledge => {
+                const statusBadge = {
+                    'pending': 'bg-warning',
+                    'approved': 'bg-success',
+                    'rejected': 'bg-danger',
+                    'needs_review': 'bg-info'
+                }[pledge.status] || 'bg-secondary';
+
+                html += `
+                    <div class="mb-2 p-2 border-bottom">
+                        <div class="d-flex justify-content-between">
+                            <strong>${pledge.impact_type}</strong>
+                            <span class="badge ${statusBadge}">${pledge.status}</span>
+                        </div>
+                        <small class="text-muted">${pledge.pledge_text.substring(0, 50)}...</small>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+    });
+}
+</script>
+{% endblock %}

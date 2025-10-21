@@ -1,0 +1,58 @@
+<nav class="navbar navbar-expand-lg navbar-dark nav-gradient shadow">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <i class="fas fa-seedling renais-accent me-2"></i>
+            <span class="fw-bold">Renais Gin</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'movement_dashboard' %}">Movement</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'impact_stories' %}">Stories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'community_circles' %}">Community</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i> {{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li><a class="dropdown-item" href="{% url 'register_bottle' %}">Register Bottle</a></li>
+                        <li><a class="dropdown-item" href="{% url 'submit_pledge' %}">Submit Pledge</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-renais ms-2" href="{% url 'register' %}">Join Movement</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

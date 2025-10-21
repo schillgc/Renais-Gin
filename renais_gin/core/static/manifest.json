@@ -1,0 +1,25 @@
+{
+    "name": "Renais Gin - Craft Your Perfect World",
+    "short_name": "Renais Gin",
+    "description": "Transform gin purchases into verified global impact through AI validation and community engagement",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1a1f36",
+    "theme_color": "#d4af37",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/static/images/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/images/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "categories": ["lifestyle", "social", "environment"],
+    "lang": "en-US",
+    "dir": "ltr"
+}

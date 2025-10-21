@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Movement Dashboard - Renais Gin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-3">Renais Movement Dashboard</h1>
+            <p class="lead text-muted">Watch our global impact grow in real-time</p>
+        </div>
+    </div>
+
+    <!-- Live Metrics -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm impact-card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-globe-americas fa-2x renais-accent mb-3"></i>
+                    <h3 class="fw-bold display-6" id="movement-community">0</h3>
+                    <p class="text-muted mb-0">Global Community</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm impact-card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-wine-bottle fa-2x renais-accent mb-3"></i>
+                    <h3 class="fw-bold display-6" id="movement-bottles">0</h3>
+                    <p class="text-muted mb-0">Bottles Registered</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm impact-card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-hand-holding-heart fa-2x renais-accent mb-3"></i>
+                    <h3 class="fw-bold display-6" id="movement-pledges">0</h3>
+                    <p class="text-muted mb-0">Pledges Made</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm impact-card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-dollar-sign fa-2x renais-accent mb-3"></i>
+                    <h3 class="fw-bold display-6" id="movement-impact">$0</h3>
+                    <p class="text-muted mb-0">Total Impact</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Impact Distribution -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-chart-pie me-2 renais-accent"></i>Impact by Category
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded">
+                                <i class="fas fa-tree fa-2x text-success mb-2"></i>
+                                <h4 class="fw-bold" id="environmental-count">0</h4>
+                                <p class="text-muted mb-0">Environmental</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded">
+                                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                                <h4 class="fw-bold" id="community-count">0</h4>
+                                <p class="text-muted mb-0">Community</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded">
+                                <i class="fas fa-graduation-cap fa-2x text-warning mb-2"></i>
+                                <h4 class="fw-bold" id="education-count">0</h4>
+                                <p class="text-muted mb-0">Education</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-bolt me-2 renais-accent"></i>Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="recent-activity">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-renais" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading recent activity...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Map Placeholder -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-map-marked-alt me-2 renais-accent"></i>Global Impact Map
+                    </h5>
+                </div>
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-globe-americas fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">Impact spreading worldwide</h5>
+                    <p class="text-muted">Our community members are creating positive change across the globe</p>
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-auto">
+                            <span class="badge bg-success me-2">USA</span>
+                            <span class="badge bg-success me-2">UK</span>
+                            <span class="badge bg-success me-2">Canada</span>
+                            <span class="badge bg-success me-2">Australia</span>
+                            <span class="badge bg-success me-2">Germany</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update movement dashboard metrics
+    function updateMovementDashboard() {
+        fetch('/api/metrics/')
+            .then(response => response.json())
+            .then(data => {
+                // Update main metrics
+                document.getElementById('movement-community').textContent = data.total_community;
+                document.getElementById('movement-bottles').textContent = data.total_bottles || 0;
+                document.getElementById('movement-pledges').textContent = data.total_pledges;
+                document.getElementById('movement-impact').textContent = `$${data.total_impact}`;
+
+                // Update impact categories
+                document.getElementById('environmental-count').textContent = data.environmental_impact || 0;
+                document.getElementById('community-count').textContent = data.community_impact || 0;
+                document.getElementById('education-count').textContent = data.education_impact || 0;
+            })
+            .catch(error => console.error('Error updating dashboard:', error));
+    }
+
+    // Update every 10 seconds for real-time feel
+    setInterval(updateMovementDashboard, 10000);
+    document.addEventListener('DOMContentLoaded', updateMovementDashboard);
+</script>
+{% endblock %}

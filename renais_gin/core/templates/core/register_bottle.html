@@ -1,49 +1,109 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}Register Bottle - Renais Gin{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="renais-card card">
-            <div class="card-header">
-                <h2 class="card-title text-center">Register Your Renais Bottle</h2>
-                <p class="text-center text-muted mb-0">After registration, you'll make a pledge to receive your $5 rebate</p>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="bottle_id" class="form-label">Bottle ID</label>
-                        <input type="text" class="form-control" id="bottle_id" name="bottle_id"
-                               placeholder="Enter the unique bottle ID" required>
-                        <div class="form-text">Find the bottle ID on the bottom of your Renais bottle</div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header renais-gradient text-light">
+                    <h2 class="h4 fw-bold mb-0">
+                        <i class="fas fa-qrcode me-2"></i>Register Your Renais Bottle
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>How to register:</strong> Find the QR code on your Renais Gin bottle and scan it,
+                        or manually enter the bottle information below.
                     </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn renais-btn-primary btn-lg">Register Bottle & Make Pledge</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <div class="renais-card card mt-4">
-            <div class="card-body">
-                <h4 class="card-title">The Renais Journey</h4>
-                <div class="row text-center">
-                    <div class="col-md-4">
-                        <div class="number-circle">1</div>
-                        <h5>Register Bottle</h5>
-                        <p>Enter your bottle's unique ID</p>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="number-circle active">2</div>
-                        <h5>Make Pledge</h5>
-                        <p>Commit to bettering your world</p>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="number-circle">3</div>
-                        <h5>Get Rebate</h5>
-                        <p>Receive $5 after community approval</p>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.bottle_id|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.batch_id|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.production_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.terroir_region|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.terroir_vintage|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">QR Code (Optional)</label>
+                                    <input type="file" class="form-control" name="qr_code" accept="image/*">
+                                    <div class="form-text">Upload a picture of your bottle's QR code</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Important:</strong> Each bottle can only be registered once.
+                            Make sure you have physical possession of the bottle you're registering.
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-renais">
+                                <i class="fas fa-save me-2"></i>Register Bottle
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Registration Benefits -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3 renais-accent">
+                        <i class="fas fa-gift me-2"></i>What happens after registration?
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-dollar-sign text-success me-3 fa-lg"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">$5 Rebate</h6>
+                                    <p class="small text-muted mb-0">Unlock your impact rebate</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-seedling text-success me-3 fa-lg"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Make a Pledge</h6>
+                                    <p class="small text-muted mb-0">Submit your impact plan</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users text-success me-3 fa-lg"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Join Community</h6>
+                                    <p class="small text-muted mb-0">Become part of our story</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

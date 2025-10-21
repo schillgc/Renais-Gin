@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Your Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Karma Score</h5>
+                <p class="card-text display-4">{{ user.karma_score }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Rebates</h5>
+                <p class="card-text display-4">${{ user.profile.total_rebates }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Approved Pledges</h5>
+                <p class="card-text display-4">{{ user.profile.approved_pledges }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Your Bottles</h3>
+{% if bottles %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Bottle ID</th>
+            <th>Batch</th>
+            <th>Registration Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for bottle in bottles %}
+        <tr>
+            <td>{{ bottle.bottle_id }}</td>
+            <td>{{ bottle.batch.batch_id }}</td>
+            <td>{{ bottle.registration_date }}</td>
+            <td>
+                {% if bottle.pledges.exists %}
+                    <span class="badge bg-success">Pledge Submitted</span>
+                {% else %}
+                    <a href="{% url 'submit_pledge' bottle.bottle_id %}" class="btn btn-sm btn-primary">Submit Pledge</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>You haven't registered any bottles yet. <a href="{% url 'register_bottle' %}">Register your first bottle</a>.</p>
+{% endif %}
+
+<h3>Your Pledges</h3>
+{% if pledges %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Submission ID</th>
+            <th>Pledge</th>
+            <th>Status</th>
+            <th>Approvals</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pledge in pledges %}
+        <tr>
+            <td>{{ pledge.submission_id }}</td>
+            <td>{{ pledge.pledge_text|truncatewords:10 }}</td>
+            <td>
+                {% if pledge.status == 'approved' %}
+                    <span class="badge bg-success">Approved</span>
+                {% elif pledge.status == 'rejected' %}
+                    <span class="badge bg-danger">Rejected</span>
+                {% else %}
+                    <span class="badge bg-warning">Pending</span>
+                {% endif %}
+            </td>
+            <td>{{ pledge.approvals }}/3</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>You haven't submitted any pledges yet.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Submit Your Karma Pledge</h2>
+<p>Now that you've registered your bottle, make a pledge to create positive impact and earn a $5 rebate.</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_pledge_text">Your Pledge</label>
+        <textarea name="pledge_text" class="form-control" id="id_pledge_text" rows="3" required></textarea>
+        <small class="form-text text-muted">Describe the positive action you will take.</small>
+    </div>
+    <div class="form-group">
+        <label for="id_impact_plan">Impact Plan</label>
+        <textarea name="impact_plan" class="form-control" id="id_impact_plan" rows="3" required></textarea>
+        <small class="form-text text-muted">Explain how you will carry out your pledge and the impact it will have.</small>
+    </div>
+    <div class="form-group">
+        <label for="id_impact_type">Impact Type</label>
+        <select name="impact_type" class="form-control" id="id_impact_type" required>
+            <option value="environmental">Environmental</option>
+            <option value="community">Community</option>
+            <option value="education">Education</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Submit Pledge</button>
+</form>
+{% endblock %}

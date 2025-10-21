@@ -17,6 +17,6 @@ django-crispy-forms==2.4
 django-debug-toolbar==6.0.0
 django-extensions==4.1
 django-filter==25.1
-django-rest-framework==0.1.0
 djangorestframework==3.16.1
 drf-yasg==1.21.10
+python-dotenv==1.0.1

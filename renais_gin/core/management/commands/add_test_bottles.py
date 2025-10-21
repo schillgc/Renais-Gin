@@ -1,3 +1,7 @@
+"""
+Management command to add test bottles for development.
+"""
+
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from core.models import Bottle
@@ -6,103 +10,72 @@ import random
 
 
 class Command(BaseCommand):
-    help = 'Add test bottles with terroir data for development and testing'
+    help = 'Add test bottles for development and testing'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--count',
             type=int,
             default=10,
-            help='Number of test bottles to create (default: 10)',
+            help='Number of test bottles to create'
+        )
+        parser.add_argument(
+            '--user',
+            type=str,
+            default='testuser',
+            help='Username to assign bottles to'
         )
 
     def handle(self, *args, **options):
         count = options['count']
+        username = options['user']
 
-        # Get or create a test user
+        # Get or create user
         user, created = User.objects.get_or_create(
-            username='test_user',
+            username=username,
             defaults={
-                'email': 'test@renaisgin.com',
-                'password': 'testpassword123'
+                'email': f'{username}@example.com',
+                'password': 'testpass123'
             }
         )
 
         if created:
             self.stdout.write(
-                self.style.SUCCESS(f'Created test user: {user.username}')
+                self.style.WARNING(f'Created new user: {username}')
             )
 
-        # Terroir data examples
-        terroir_options = [
-            {
-                "region": "Chablis",
-                "vintage": "2022",
-                "soil_type": "Kimmeridgian limestone",
-                "grapes": "Chardonnay",
-                "harvest_date": "2022-09-15",
-                "elevation": "150m",
-                "climate": "Cool continental",
-                "rainfall": "650mm",
-                "sun_exposure": "South-facing"
-            },
-            {
-                "region": "Burgundy",
-                "vintage": "2021",
-                "soil_type": "Clay-limestone",
-                "grapes": "Pinot Noir",
-                "harvest_date": "2021-09-20",
-                "elevation": "200m",
-                "climate": "Temperate continental",
-                "rainfall": "700mm",
-                "sun_exposure": "East-facing"
-            },
-            {
-                "region": "Champagne",
-                "vintage": "2020",
-                "soil_type": "Chalk",
-                "grapes": "Pinot Meunier",
-                "harvest_date": "2020-09-10",
-                "elevation": "100m",
-                "climate": "Cool continental",
-                "rainfall": "600mm",
-                "sun_exposure": "South-facing"
-            }
-        ]
+        regions = ['Chablis', 'Burgundy', 'Champagne', 'Loire Valley', 'Provence']
+        vintages = ['2020', '2021', '2022', '2023']
 
-        # Batch IDs
-        batch_ids = ["BATCH_001", "BATCH_002", "BATCH_003"]
-
-        # Create test bottles
         bottles_created = 0
-        for i in range(count):
-            # Select random terroir data
-            terroir_data = random.choice(terroir_options)
-            batch_id = random.choice(batch_ids)
 
-            # Calculate production date (within last 2 years)
-            production_date = date.today() - timedelta(days=random.randint(30, 730))
+        for i in range(count):
+            bottle_id = f"TEST_{i + 1:03d}"
+
+            # Skip if bottle already exists
+            if Bottle.objects.filter(bottle_id=bottle_id).exists():
+                self.stdout.write(
+                    self.style.WARNING(f'Bottle {bottle_id} already exists, skipping...')
+                )
+                continue
 
             bottle = Bottle.objects.create(
-                bottle_id=f"TEST_{i + 1:03d}",
-                batch_id=batch_id,
-                production_date=production_date,
-                terroir_data=terroir_data,
-                registered=random.choice([True, False]),
-                registered_to=user if random.choice([True, False]) else None
+                bottle_id=bottle_id,
+                batch_id=f"BATCH_{random.randint(100, 999)}",
+                production_date=date.today() - timedelta(days=random.randint(30, 365)),
+                terroir_region=random.choice(regions),
+                terroir_vintage=random.choice(vintages),
+                registered_to=user,
+                status='registered'
             )
 
-            if bottle.registered:
-                bottles_created += 1
-                self.stdout.write(
-                    self.style.SUCCESS(f'Created bottle {bottle.bottle_id} with terroir data')
-                )
-            else:
-                self.stdout.write(
-                    self.style.WARNING(f'Created unregistered bottle {bottle.bottle_id}')
-                )
+            bottles_created += 1
+            self.stdout.write(
+                self.style.SUCCESS(f'Created bottle: {bottle.bottle_id}')
+            )
 
         self.stdout.write(
             self.style.SUCCESS(
-                f'Successfully created {bottles_created} registered bottles and {count - bottles_created} unregistered bottles')
+                f'Successfully created {bottles_created} test bottles for user {username}'
+            )
         )

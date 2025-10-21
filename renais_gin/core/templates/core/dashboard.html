@@ -1,211 +1,186 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}Dashboard - Renais Gin{% endblock %}
-
-{% block extra_css %}
-<style>
-    .dashboard-hero {
-        background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.8)), url('{% static "images/renais-background.jpg" %}');
-        background-size: cover;
-        background-position: center;
-        color: white;
-        padding: 4rem 0;
-        margin-bottom: 3rem;
-        border-radius: 0 0 20px 20px;
-    }
-
-    .karma-score {
-        font-size: 2.5rem;
-        color: var(--renais-gold);
-        font-weight: bold;
-    }
-
-    .bottle-card img {
-        height: 200px;
-        object-fit: cover;
-    }
-</style>
-{% endblock %}
+{% block title %}My Dashboard - Renais Gin{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="dashboard-hero text-center">
-    <div class="container">
-        <h1 class="display-4 fw-bold">Welcome to the Renais Movement</h1>
-        <p class="lead">Join us in crafting a better world, one pledge at a time</p>
-    </div>
-</div>
-
-<div class="row">
-    <!-- User Stats -->
-    <div class="col-md-4 mb-4">
-        <div class="renais-card card h-100">
-            <div class="card-body text-center">
-                <h3 class="card-title">Your Impact</h3>
-                <div class="karma-score">{{ user.userprofile.karma_score }}</div>
-                <p class="text-muted">Karma Points</p>
-                <div class="mt-3">
-                    <p><strong>{{ user_pledges.count }}</strong> Pledges Made</p>
-                    <p><strong>{{ user_bottles.count }}</strong> Bottles Registered</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Movement Metrics -->
-    <div class="col-md-4 mb-4">
-        <div class="renais-card card h-100">
-            <div class="card-body text-center">
-                <h3 class="card-title">Global Movement</h3>
-                <div class="row mt-4">
-                    <div class="col-6">
-                        <h4>{{ metrics.community_size }}</h4>
-                        <small>Members</small>
-                    </div>
-                    <div class="col-6">
-                        <h4>{{ metrics.total_pledges }}</h4>
-                        <small>Pledges</small>
-                    </div>
-                </div>
-                <div class="row mt-4">
-                    <div class="col-6">
-                        <h4>{{ metrics.impact_stories }}</h4>
-                        <small>Stories</small>
-                    </div>
-                    <div class="col-6">
-                        <h4>{{ metrics.global_reach|length }}</h4>
-                        <small>Countries</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recommendations -->
-    <div class="col-md-4 mb-4">
-        <div class="renais-card card h-100">
-            <div class="card-body">
-                <h3 class="card-title">Your Recommendations</h3>
-                {% if recommendations %}
-                <ul class="list-group list-group-flush">
-                    {% for rec in recommendations %}
-                    <li class="list-group-item">
-                        <small class="text-muted">{{ rec.type|title }}:</small><br>
-                        {{ rec.value }} <span class="badge bg-warning float-end">{{ rec.confidence|floatformat:2 }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <p class="text-muted">Complete more pledges to get personalized recommendations</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Bottles -->
-<div class="row mt-5">
-    <div class="col-12">
-        <h2 class="mb-4">Your Registered Bottles</h2>
-        {% if user_bottles %}
-        <div class="row">
-            {% for bottle in user_bottles %}
-            <div class="col-md-4 mb-4">
-                <div class="renais-card card h-100">
-                    {% if bottle.qr_code %}
-                    <img src="{{ bottle.qr_code.url }}" class="card-img-top" alt="Renais Bottle QR Code">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">Bottle {{ bottle.bottle_id }}</h5>
-                        <p class="card-text">
-                            <small class="text-muted">Batch: {{ bottle.batch_id }}</small><br>
-                            <small class="text-muted">Registered: {{ bottle.registration_date|date:"M d, Y" }}</small>
-                        </p>
-                        <a href="{% url 'core:submit_pledge' bottle.bottle_id %}" class="btn renais-btn-primary">Submit Pledge</a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-5">
-            <h4 class="text-muted">You haven't registered any bottles yet</h4>
-            <p>Register your first bottle to start your journey with the Renais movement</p>
-            <a href="{% url 'core:register_bottle' %}" class="btn renais-btn-primary btn-lg">Register Your First Bottle</a>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Recent Pledges -->
-<div class="row mt-5">
-    <div class="col-12">
-        <h2 class="mb-4">Your Pledges</h2>
-        {% if user_pledges %}
-        <div class="row">
-            {% for pledge in user_pledges %}
-            <div class="col-md-6 mb-4">
-                <div class="renais-card card h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <h5 class="card-title">Pledge for Bottle {{ pledge.bottle.bottle_id }}</h5>
-                            <span class="badge bg-{% if pledge.status == 'approved' %}success{% elif pledge.status == 'pending' %}warning{% else %}danger{% endif %}">
-                                {{ pledge.status|title }}
-                            </span>
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="renais-accent mb-2">
+                            <i class="fas fa-user-circle fa-3x"></i>
                         </div>
-                        <p class="card-text">{{ pledge.pledge_text|truncatewords:30 }}</p>
-                        <p class="card-text">
-                            <small class="text-muted">Impact: {{ pledge.impact_type|title }}</small><br>
-                            <small class="text-muted">Submitted: {{ pledge.timestamp|date:"M d, Y" }}</small>
-                        </p>
-                        {% if pledge.status == 'approved' %}
-                        <div class="alert alert-success">
-                            <small>Your rebate has been processed! Thank you for your commitment.</small>
-                        </div>
-                        {% endif %}
+                        <h5 class="fw-bold">{{ user.username }}</h5>
+                        <p class="text-muted small">{{ user.email }}</p>
                     </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-4">
-            <p class="text-muted">You haven't made any pledges yet. Submit your first pledge after registering a bottle.</p>
-        </div>
-        {% endif %}
-    </div>
-</div>
 
-<!-- Section for bottles without pledges -->
-{% if bottles_without_pledges %}
-<div class="row mt-5">
-    <div class="col-12">
-        <h2 class="mb-4">Complete Your Registration</h2>
-        <div class="alert alert-info">
-            <h5>You have registered bottles without pledges</h5>
-            <p>Complete your registration by making a pledge for these bottles to receive your $5 rebate.</p>
-        </div>
-        <div class="row">
-            {% for bottle in bottles_without_pledges %}
-            <div class="col-md-4 mb-4">
-                <div class="renais-card card h-100">
-                    {% if bottle.qr_code %}
-                    <img src="{{ bottle.qr_code.url }}" class="card-img-top" alt="Renais Bottle QR Code">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">Bottle {{ bottle.bottle_id }}</h5>
-                        <p class="card-text">
-                            <small class="text-muted">Batch: {{ bottle.batch_id }}</small><br>
-                            <small class="text-muted">Registered: {{ bottle.registration_date|date:"M d, Y" }}</small>
-                        </p>
-                        <a href="{% url 'core:submit_pledge' bottle.bottle_id %}" class="btn renais-btn-primary">Complete Pledge</a>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a href="{% url 'register_bottle' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-qrcode me-2"></i>Register Bottle
+                        </a>
+                        <a href="{% url 'submit_pledge' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-hand-holding-heart me-2"></i>Submit Pledge
+                        </a>
+                        <a href="{% url 'impact_stories' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-book-open me-2"></i>Impact Stories
+                        </a>
                     </div>
                 </div>
             </div>
-            {% endfor %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Welcome Header -->
+            <div class="card renais-gradient text-light shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 fw-bold mb-2">Welcome back, {{ user.username }}!</h1>
+                            <p class="mb-0">Continue crafting your perfect world through positive impact.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <i class="fas fa-seedling fa-3x renais-accent"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm impact-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-wine-bottle renais-accent fa-2x mb-3"></i>
+                            <h3 class="fw-bold">{{ user_metrics.total_bottles|default:0 }}</h3>
+                            <p class="text-muted mb-0">Registered Bottles</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm impact-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-hand-holding-heart renais-accent fa-2x mb-3"></i>
+                            <h3 class="fw-bold">{{ user_metrics.total_pledges|default:0 }}</h3>
+                            <p class="text-muted mb-0">Pledges Made</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm impact-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle renais-accent fa-2x mb-3"></i>
+                            <h3 class="fw-bold">{{ user_metrics.approved_pledges|default:0 }}</h3>
+                            <p class="text-muted mb-0">Approved Pledges</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row g-4">
+                <!-- Recent Pledges -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="fw-bold mb-0">
+                                <i class="fas fa-history me-2 renais-accent"></i>Recent Pledges
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_pledges %}
+                            <div class="list-group list-group-flush">
+                                {% for pledge in recent_pledges %}
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">{{ pledge.impact_type|title }} Impact</h6>
+                                            <p class="small text-muted mb-1">{{ pledge.pledge_text|truncatewords:10 }}</p>
+                                        </div>
+                                        <span class="badge {% if pledge.status == 'approved' %}bg-success{% elif pledge.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ pledge.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">{{ pledge.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No pledges yet</p>
+                                <a href="{% url 'submit_pledge' %}" class="btn btn-renais btn-sm">Make Your First Pledge</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registered Bottles -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="fw-bold mb-0">
+                                <i class="fas fa-wine-bottle me-2 renais-accent"></i>Your Bottles
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if registered_bottles %}
+                            <div class="list-group list-group-flush">
+                                {% for bottle in registered_bottles %}
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">{{ bottle.bottle_id }}</h6>
+                                            <p class="small text-muted mb-0">{{ bottle.terroir_region }} • {{ bottle.terroir_vintage }}</p>
+                                        </div>
+                                        <span class="badge {% if bottle.status == 'registered' %}bg-primary{% else %}bg-success{% endif %}">
+                                            {{ bottle.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-wine-bottle fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No bottles registered yet</p>
+                                <a href="{% url 'register_bottle' %}" class="btn btn-renais btn-sm">Register Your First Bottle</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <h5 class="fw-bold mb-3">Ready to Make an Impact?</h5>
+                            <div class="d-flex flex-wrap justify-content-center gap-3">
+                                <a href="{% url 'register_bottle' %}" class="btn btn-renais">
+                                    <i class="fas fa-qrcode me-2"></i>Register New Bottle
+                                </a>
+                                <a href="{% url 'submit_pledge' %}" class="btn btn-outline-dark">
+                                    <i class="fas fa-hand-holding-heart me-2"></i>Submit Pledge
+                                </a>
+                                <a href="{% url 'impact_stories' %}" class="btn btn-outline-dark">
+                                    <i class="fas fa-book-open me-2"></i>View Stories
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-{% endif %}
 {% endblock %}

@@ -1,0 +1,15 @@
+-r base.txt
+
+# Development tools
+django-debug-toolbar==6.0.0
+django-extensions==4.1
+ipython==8.22.0
+jupyter==1.0.0
+coverage==7.4.3
+flake8==7.0.0
+black==24.2.0
+isort==5.13.2
+bandit==1.7.6
+pytest==7.4.4
+pytest-django==4.8.0
+factory-boy==3.3.0

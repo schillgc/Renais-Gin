@@ -1,338 +1,322 @@
 /* Renais Gin Custom Styles */
 :root {
-    --renais-gold: #c6a467;
-    --renais-dark: #2c3e50;
-    --renais-light: #f8f9fa;
-    --renais-terroir: #8a9a5b;
-    --renais-burgundy: #722f37;
-    --renais-stone: #e8e6df;
+    --renais-dark: #1a1f36;
+    --renais-dark-alt: #2d3748;
+    --renais-gold: #d4af37;
+    --renais-gold-light: #f7ef8a;
+    --renais-gold-dark: #b8941f;
+    --renais-success: #10b981;
+    --renais-info: #3b82f6;
+    --renais-warning: #f59e0b;
+    --renais-danger: #ef4444;
 }
 
 /* Base Styles */
 body {
-    font-family: 'Lato', sans-serif;
-    color: #333;
-    background-color: var(--renais-light);
-    line-height: 1.6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    color: var(--renais-dark);
+.renais-gradient {
+    background: linear-gradient(135deg, var(--renais-dark) 0%, var(--renais-dark-alt) 100%) !important;
 }
 
-/* Navigation */
-.renais-navbar {
-    background-color: white;
-    border-bottom: 2px solid var(--renais-gold);
-    padding: 0.8rem 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+.renais-accent {
+    color: var(--renais-gold) !important;
 }
 
-.renais-brand {
-    font-family: 'Playfair Display', serif;
-    color: var(--renais-dark);
-    font-size: 1.8rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+.bg-renais {
+    background-color: var(--renais-dark) !important;
 }
 
-.navbar-nav .nav-link {
-    color: var(--renais-dark);
-    font-weight: 500;
-    transition: color 0.3s ease;
-    padding: 0.5rem 1rem;
-}
-
-.navbar-nav .nav-link:hover {
-    color: var(--renais-gold);
+.text-renais {
+    color: var(--renais-gold) !important;
 }
 
 /* Buttons */
-.renais-btn-primary {
-    background-color: var(--renais-gold);
-    border-color: var(--renais-gold);
-    color: white;
-    font-weight: 500;
-    padding: 0.6rem 1.5rem;
-    border-radius: 4px;
+.btn-renais {
+    background: linear-gradient(135deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    border: none;
+    color: var(--renais-dark);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.renais-btn-primary:hover {
-    background-color: var(--renais-dark);
-    border-color: var(--renais-dark);
-    color: white;
+.btn-renais:hover {
+    background: linear-gradient(135deg, var(--renais-gold-dark) 0%, var(--renais-gold-light) 100%);
+    color: var(--renais-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.renais-btn-outline {
-    background-color: transparent;
+.btn-renais:active {
+    transform: translateY(0);
+}
+
+.btn-outline-renais {
     border: 2px solid var(--renais-gold);
     color: var(--renais-gold);
-    font-weight: 500;
-    padding: 0.5rem 1.5rem;
-    border-radius: 4px;
+    background: transparent;
+    font-weight: 600;
+    border-radius: 0.75rem;
     transition: all 0.3s ease;
 }
 
-.renais-btn-outline:hover {
-    background-color: var(--renais-gold);
-    color: white;
+.btn-outline-renais:hover {
+    background: var(--renais-gold);
+    color: var(--renais-dark);
+    transform: translateY(-2px);
 }
 
 /* Cards */
-.renais-card {
+.impact-card {
     border: none;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-left: 4px solid var(--renais-gold);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
     overflow: hidden;
 }
 
-.renais-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+.impact-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.renais-card .card-header {
-    background-color: white;
-    border-bottom: 1px solid rgba(198, 164, 103, 0.2);
-    font-weight: 600;
-}
-
-/* Hero Sections */
-.dashboard-hero {
-    background: linear-gradient(rgba(44, 62, 80, 0.85), rgba(44, 62, 80, 0.9)), url('../images/renais-background.jpg');
-    background-size: cover;
-    background-position: center;
+.impact-card .card-header {
+    background: linear-gradient(135deg, var(--renais-dark) 0%, var(--renais-dark-alt) 100%);
     color: white;
-    padding: 4rem 0;
-    margin-bottom: 3rem;
-    border-radius: 0 0 20px 20px;
-    text-align: center;
+    border-bottom: none;
+    padding: 1.5rem;
 }
 
-.dashboard-hero h1 {
-    color: white;
-    font-size: 2.8rem;
-    margin-bottom: 1rem;
+.impact-card .card-body {
+    padding: 1.5rem;
 }
 
-.dashboard-hero p {
-    font-size: 1.2rem;
-    opacity: 0.9;
+/* Navigation */
+.nav-gradient {
+    background: linear-gradient(90deg, var(--renais-dark) 0%, var(--renais-dark-alt) 100%);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Karma Score */
-.karma-score {
-    font-size: 2.8rem;
-    color: var(--renais-gold);
-    font-weight: bold;
-    font-family: 'Playfair Display', serif;
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
 }
 
-/* Forms */
-.form-control {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 0.75rem;
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
     transition: all 0.3s ease;
 }
 
-.form-control:focus {
-    border-color: var(--renais-gold);
-    box-shadow: 0 0 0 0.2rem rgba(198, 164, 103, 0.25);
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--renais-gold);
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.form-label {
-    font-weight: 600;
-    color: var(--renais-dark);
-    margin-bottom: 0.5rem;
-}
-
-.form-text {
-    color: #6c757d;
-    font-size: 0.85rem;
-}
-
-/* Alerts */
-.alert {
-    border: none;
-    border-radius: 6px;
-    padding: 1rem 1.5rem;
-}
-
-.alert-success {
-    background-color: rgba(40, 167, 69, 0.15);
-    color: #28a745;
-}
-
-.alert-info {
-    background-color: rgba(23, 162, 184, 0.15);
-    color: #17a2b8;
-}
-
-.alert-warning {
-    background-color: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
-}
-
-.alert-danger {
-    background-color: rgba(220, 53, 69, 0.15);
-    color: #dc3545;
-}
-
-/* Badges */
-.badge {
-    font-weight: 500;
-    padding: 0.5rem 0.75rem;
-    border-radius: 4px;
+.navbar-dark .navbar-nav .nav-link.active {
+    color: var(--renais-gold);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 /* Footer */
-.renais-footer {
-    background-color: var(--renais-dark);
-    color: white;
-    padding: 3rem 0;
-    margin-top: 4rem;
+.footer-gradient {
+    background: linear-gradient(90deg, var(--renais-dark-alt) 0%, var(--renais-dark) 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.renais-footer h5 {
-    color: white;
-    margin-bottom: 1.2rem;
-    font-size: 1.2rem;
+/* Badges */
+.badge-renais {
+    background: linear-gradient(135deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    color: var(--renais-dark);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
 }
 
-.renais-footer a {
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.renais-footer a:hover {
-    color: var(--renais-gold);
-}
-
-.renais-footer ul li {
-    margin-bottom: 0.5rem;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in {
-    animation: fadeIn 0.6s ease forwards;
-}
-
-.delay-1 { animation-delay: 0.2s; }
-.delay-2 { animation-delay: 0.4s; }
-.delay-3 { animation-delay: 0.6s; }
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .dashboard-hero h1 {
-        font-size: 2.2rem;
-    }
-
-    .dashboard-hero p {
-        font-size: 1rem;
-    }
-
-    .karma-score {
-        font-size: 2.2rem;
-    }
-}
-
-/* Loading spinner */
-.renais-spinner {
-    display: inline-block;
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid rgba(198, 164, 103, 0.3);
-    border-radius: 50%;
-    border-top-color: var(--renais-gold);
-    animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Progress bars */
-.renais-progress {
-    height: 8px;
-    background-color: #e9ecef;
-    border-radius: 4px;
+/* Progress Bars */
+.progress-renais {
+    height: 0.5rem;
+    border-radius: 1rem;
+    background-color: #e5e7eb;
     overflow: hidden;
 }
 
-.renais-progress-bar {
-    height: 100%;
-    background-color: var(--renais-gold);
-    border-radius: 4px;
-    transition: width 0.6s ease;
+.progress-renais .progress-bar {
+    background: linear-gradient(90deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    border-radius: 1rem;
 }
 
-/* Number circles for the registration journey */
-.number-circle {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #e9ecef;
-    color: #6c757d;
+/* Form Styles */
+.form-control:focus {
+    border-color: var(--renais-gold);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--renais-gold);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: var(--renais-gold);
+    border-color: var(--renais-gold);
+}
+
+/* Alert Styles */
+.alert-renais {
+    background: linear-gradient(135deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    color: var(--renais-dark);
+    border: none;
+    border-radius: 1rem;
+    border-left: 4px solid var(--renais-gold-dark);
+}
+
+/* Loading Spinner */
+.spinner-renais {
+    color: var(--renais-gold);
+}
+
+/* Stats Counter */
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 80vh;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin: 0 auto 1rem;
-    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.number-circle.active {
-    background-color: var(--renais-gold);
-    color: white;
-    transform: scale(1.1);
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/static/images/pattern.svg') repeat;
+    opacity: 0.1;
+    pointer-events: none;
 }
 
-/* Pledge page specific styles */
-.pledge-progress {
-    height: 8px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    margin-bottom: 2rem;
+/* Animation Classes */
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
 }
 
-.pledge-progress-bar {
-    height: 100%;
-    background-color: var(--renais-gold);
-    border-radius: 4px;
-    width: 33%; /* First step completed */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* Completed step styling */
-.number-circle.completed {
-    background-color: var(--renais-terroir);
-    color: white;
+.pulse-renais {
+    animation: pulseRenais 2s infinite;
 }
 
-/* Pledge progress bar */
-.pledge-progress {
-    height: 8px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    margin-bottom: 2rem;
+@keyframes pulseRenais {
+    0% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(212, 175, 55, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+    }
 }
 
-.pledge-progress-bar {
-    height: 100%;
-    background-color: var(--renais-gold);
-    border-radius: 4px;
-    transition: width 0.5s ease;
+/* QR Code Styling */
+.qr-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--renais-gold);
+}
+
+/* Impact Categories */
+.impact-environmental {
+    border-left-color: var(--renais-success) !important;
+}
+
+.impact-community {
+    border-left-color: var(--renais-info) !important;
+}
+
+.impact-education {
+    border-left-color: var(--renais-warning) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 60vh;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .impact-card {
+        margin-bottom: 1rem;
+    }
+
+    .btn-renais {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #0f172a;
+        color: #e2e8f0;
+    }
+
+    .card {
+        background-color: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .text-muted {
+        color: #94a3b8 !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .footer,
+    .btn {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
 }

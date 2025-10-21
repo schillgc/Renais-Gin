@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Renais Gin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-4 text-center mb-4">About Renais Gin</h1>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Our Vision</h3>
+                    <p class="card-text lead">
+                        "We don't sell gin. We sell a key. A key to a locked room in the human spirit where the desire to create, to connect, and to leave things better than we found it resides."
+                    </p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h4><i class="fas fa-leaf text-success me-2"></i>Sustainability</h4>
+                            <p>Every bottle of Renais Gin represents a commitment to environmental stewardship and sustainable practices.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h4><i class="fas fa-users text-primary me-2"></i>Community</h4>
+                            <p>We're building a global community of like-minded individuals dedicated to positive change.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>The Karma Economy</h3>
+                    <p>Our unique Karma Economy transforms consumerism into activism. With every bottle purchase, you gain access to:</p>
+                    <ul>
+                        <li><strong>$5 Rebates</strong> for validated positive actions</li>
+                        <li><strong>AI-powered validation</strong> of your impact pledges</li>
+                        <li><strong>Blockchain transparency</strong> for all community validations</li>
+                        <li><strong>Global impact tracking</strong> and community stories</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <h3>Ready to Make a Difference?</h3>
+                <p class="lead">Join thousands of others who are turning their gin enjoyment into global impact.</p>
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Join the Movement</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

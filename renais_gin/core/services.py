@@ -1,142 +1,446 @@
-import numpy as np
-from collections import defaultdict
-from datetime import datetime, timedelta
-from .models import KarmaPledge, MovementMetrics, UserProfile
+"""
+Business logic services for Renais Gin core functionality.
+"""
+
+import hashlib
+import json
+from datetime import datetime
+from django.db import transaction
+from django.contrib.auth.models import User
+from django.conf import settings
+from django.core.exceptions import ValidationError
+
+from .models import (
+    Bottle, KarmaPledge, PledgeValidation, Rebate,
+    CommunityCircle, UserProfile
+)
+from .ai_services import RenaissanceAICore
 
 
-class KarmaValidationService:
-    """Service for validating community pledges"""
+class RenaisGinService:
+    """
+    Main service class for Renais Gin business logic.
+    """
 
-    @staticmethod
-    def analyze_pledge_sentiment(pledge_text):
-        """Analyze the authenticity and sentiment of a pledge"""
-        positive_words = ['plant', 'help', 'support', 'create', 'improve', 'better', 'community', 'green',
-                          'sustainable']
-        pledge_lower = pledge_text.lower()
+    def __init__(self):
+        self.ai_core = RenaissanceAICore()
 
-        # Count positive words
-        positive_count = sum(1 for word in positive_words if word in pledge_lower)
+    @transaction.atomic
+    def register_bottle(self, bottle_data: dict, user: User) -> dict:
+        """
+        Register a new bottle to a user.
 
-        # Simple score based on positive words and length
-        word_count = len(pledge_text.split())
-        if word_count == 0:
-            return 0.0
+        Args:
+            bottle_data: Dictionary containing bottle information
+            user: The user registering the bottle
 
-        score = min(positive_count / 5.0, 1.0) * 0.7 + min(word_count / 50.0, 1.0) * 0.3
-        return score
-
-    @staticmethod
-    def validate_submission(pledge_text, impact_plan):
-        """Validate a community submission"""
-        sentiment_score = KarmaValidationService.analyze_pledge_sentiment(pledge_text)
-
-        if sentiment_score < 0.3:
-            return {"status": "rejected", "reason": "Pledge lacks authenticity"}
-        elif sentiment_score < 0.6:
-            return {"status": "needs_review", "score": sentiment_score}
-        else:
-            return {"status": "approved", "score": sentiment_score}
-
-    @staticmethod
-    def classify_impact_type(impact_plan):
-        """Classify impact type from text"""
-        plan_lower = impact_plan.lower()
-        if any(word in plan_lower for word in ['environment', 'sustainable', 'recycle', 'planet']):
-            return 'environmental'
-        elif any(word in plan_lower for word in ['community', 'local', 'neighborhood', 'help']):
-            return 'community'
-        elif any(word in plan_lower for word in ['education', 'teach', 'learn', 'school']):
-            return 'education'
-        else:
-            return 'other'
-
-
-class StoryCurationService:
-    """Service for curating and analyzing community stories"""
-
-    @staticmethod
-    def generate_impact_report(timeframe_days=30):
-        """Generate impact report from stories"""
-        time_threshold = datetime.now() - timedelta(days=timeframe_days)
-        recent_pledges = KarmaPledge.objects.filter(timestamp__gte=time_threshold)
-
-        impact_categories = defaultdict(int)
-        for pledge in recent_pledges:
-            impact_categories[pledge.impact_type] += 1
-
-        return dict(impact_categories)
-
-
-class CommunityGrowthService:
-    """Service for managing community growth and engagement"""
-
-    @staticmethod
-    def identify_potential_leaders(min_engagement=10.0):
-        """Identify community members with leadership potential"""
-        # This would be implemented with actual engagement metrics
-        # For now, return users who have submitted multiple pledges
-        from django.db.models import Count
-        from django.contrib.auth.models import User
-
-        potential_leaders = User.objects.annotate(
-            pledge_count=Count('karmapledge')
-        ).filter(pledge_count__gte=3).exclude(
-            led_circles__isnull=False
-        )
-
-        return [(user, user.pledge_count) for user in potential_leaders]
-
-
-class PersonalizationService:
-    """Service for personalized user experiences"""
-
-    @staticmethod
-    def generate_recommendations(user):
-        """Generate personalized recommendations for user"""
+        Returns:
+            Dictionary with success status and data/error message
+        """
         try:
-            profile = user.userprofile
+            # Check if bottle already exists
+            if Bottle.objects.filter(bottle_id=bottle_data['bottle_id']).exists():
+                return {
+                    'success': False,
+                    'error': 'Bottle ID already registered'
+                }
+
+            # Generate QR code for the bottle
+            qr_path = self.ai_core.bottle_manager.generate_bottle_qr(
+                bottle_data['bottle_id'],
+                bottle_data
+            )
+
+            # Create bottle record
+            bottle = Bottle.objects.create(
+                bottle_id=bottle_data['bottle_id'],
+                batch_id=bottle_data['batch_id'],
+                production_date=bottle_data['production_date'],
+                terroir_region=bottle_data.get('terroir_region', 'Chablis'),
+                terroir_vintage=bottle_data.get('terroir_vintage', '2022'),
+                qr_code=qr_path,
+                registered_to=user,
+                registration_date=datetime.now(),
+                status='registered'
+            )
+
+            # Update user engagement score
+            self._update_user_engagement(user)
+
+            return {
+                'success': True,
+                'bottle': bottle,
+                'qr_code': qr_path
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @transaction.atomic
+    def submit_pledge(self, user: User, bottle_id: str,
+                      pledge_text: str, impact_plan: str) -> dict:
+        """
+        Submit a new karma pledge.
+
+        Args:
+            user: The user making the pledge
+            bottle_id: ID of the bottle being pledged for
+            pledge_text: The pledge statement
+            impact_plan: Detailed impact implementation plan
+
+        Returns:
+            Dictionary with success status and data/error message
+        """
+        try:
+            bottle = Bottle.objects.get(bottle_id=bottle_id, registered_to=user)
+
+            # Validate bottle eligibility
+            if not bottle.can_make_pledge():
+                return {
+                    'success': False,
+                    'error': 'Bottle is not eligible for pledging'
+                }
+
+            # AI validation
+            ai_result = self.ai_core.process_pledge_submission(
+                user.id, bottle_id, pledge_text, impact_plan
+            )
+
+            # Generate submission ID
+            submission_id = hashlib.sha256(
+                f"{user.id}{bottle_id}{datetime.now().isoformat()}".encode()
+            ).hexdigest()[:16]
+
+            # Determine initial status based on AI validation
+            if ai_result['status'] == 'approved':
+                initial_status = 'pending'  # Needs community validation
+            elif ai_result['status'] == 'needs_review':
+                initial_status = 'needs_review'
+            else:
+                initial_status = 'rejected'
+
+            # Create pledge
+            pledge = KarmaPledge.objects.create(
+                user=user,
+                bottle=bottle,
+                pledge_text=pledge_text,
+                impact_plan=impact_plan,
+                impact_type=self.ai_core.classify_impact_type(impact_plan),
+                sentiment_score=ai_result.get('score'),
+                status=initial_status,
+                submission_id=submission_id,
+                ai_validation_data=ai_result
+            )
+
+            # Create rebate record if AI approved
+            if ai_result['status'] == 'approved':
+                Rebate.objects.create(pledge=pledge)
+
+            # Update user engagement score
+            self._update_user_engagement(user)
+
+            return {
+                'success': True,
+                'pledge': pledge,
+                'ai_validation': ai_result
+            }
+
+        except Bottle.DoesNotExist:
+            return {
+                'success': False,
+                'error': 'Bottle not found or not registered to user'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @transaction.atomic
+    def validate_pledge(self, validator: User, pledge_id: str,
+                        approval: bool, comments: str = '',
+                        ip_address: str = None, user_agent: str = None) -> dict:
+        """
+        Validate a pledge as a community member.
+
+        Args:
+            validator: User performing the validation
+            pledge_id: ID of the pledge to validate
+            approval: Whether the pledge is approved
+            comments: Optional comments about the validation
+            ip_address: Validator's IP address
+            user_agent: Validator's user agent string
+
+        Returns:
+            Dictionary with success status
+        """
+        try:
+            pledge = KarmaPledge.objects.get(id=pledge_id)
+
+            # Cannot validate your own pledge
+            if pledge.user == validator:
+                return {
+                    'success': False,
+                    'error': 'Cannot validate your own pledge'
+                }
+
+            # Check if already validated
+            if PledgeValidation.objects.filter(
+                    pledge=pledge, validator=validator
+            ).exists():
+                return {
+                    'success': False,
+                    'error': 'You have already validated this pledge'
+                }
+
+            # Create validation record
+            validation = PledgeValidation.objects.create(
+                pledge=pledge,
+                validator=validator,
+                approved=approval,
+                comments=comments,
+                validator_ip=ip_address,
+                validator_user_agent=user_agent
+            )
+
+            # Update pledge status if enough validations
+            self._update_pledge_status(pledge)
+
+            # Update validator's engagement score
+            self._update_user_engagement(validator)
+
+            return {
+                'success': True,
+                'validation': validation
+            }
+
+        except KarmaPledge.DoesNotExist:
+            return {
+                'success': False,
+                'error': 'Pledge not found'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    def get_user_metrics(self, user: User) -> dict:
+        """
+        Get comprehensive user engagement and impact metrics.
+
+        Args:
+            user: User to get metrics for
+
+        Returns:
+            Dictionary with user metrics
+        """
+        try:
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            pledges = KarmaPledge.objects.filter(user=user)
+            bottles = Bottle.objects.filter(registered_to=user)
+            validations_given = PledgeValidation.objects.filter(validator=user)
+
+            # Calculate various metrics
+            total_impact = pledges.filter(status='approved').count() * 5  # $5 per approval
+
+            return {
+                'total_pledges': pledges.count(),
+                'approved_pledges': pledges.filter(status='approved').count(),
+                'pending_pledges': pledges.filter(status='pending').count(),
+                'total_bottles': bottles.count(),
+                'validations_given': validations_given.count(),
+                'engagement_score': profile.engagement_score,
+                'total_impact': total_impact,
+                'preferred_causes': profile.preferred_causes,
+                'member_since': user.date_joined.strftime('%B %Y'),
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def get_movement_metrics(self) -> dict:
+        """
+        Get global movement metrics.
+
+        Returns:
+            Dictionary with global movement metrics
+        """
+        from django.db.models import Count, Q
+
+        total_bottles = Bottle.objects.count()
+        total_pledges = KarmaPledge.objects.count()
+        approved_pledges = KarmaPledge.objects.filter(status='approved').count()
+        total_community = User.objects.filter(is_active=True).count()
+        total_rebates = Rebate.objects.filter(status='completed').count()
+
+        # Impact by category
+        impact_by_category = KarmaPledge.objects.filter(
+            status='approved'
+        ).values('impact_type').annotate(count=Count('id'))
+
+        # Community circles stats
+        active_circles = CommunityCircle.objects.filter(is_active=True).count()
+        total_circle_members = CommunityCircle.objects.aggregate(
+            total_members=Count('members') + Count('id')  # +1 for each leader
+        )['total_members'] or 0
+
+        return {
+            'total_community': total_community,
+            'total_bottles': total_bottles,
+            'total_pledges': total_pledges,
+            'approved_pledges': approved_pledges,
+            'total_rebates': total_rebates,
+            'total_impact': approved_pledges * 5,  # $5 per rebate
+            'active_circles': active_circles,
+            'total_circle_members': total_circle_members,
+            'impact_by_category': {item['impact_type']: item['count'] for item in impact_by_category},
+        }
+
+    # Private helper methods
+    def _update_pledge_status(self, pledge: KarmaPledge):
+        """Update pledge status based on validation count."""
+        validations = pledge.validations.all()
+        approval_count = validations.filter(approved=True).count()
+        rejection_count = validations.filter(approved=False).count()
+
+        required_approvals = settings.RENAIS_SETTINGS['COMMUNITY_VALIDATIONS_REQUIRED']
+
+        if approval_count >= required_approvals:
+            pledge.status = 'approved'
+            pledge.save()
+
+            # Ensure rebate exists
+            if not hasattr(pledge, 'rebate'):
+                Rebate.objects.create(pledge=pledge)
+
+        elif rejection_count >= required_approvals:
+            pledge.status = 'rejected'
+            pledge.save()
+
+    def _update_user_engagement(self, user: User):
+        """Update user engagement score."""
+        try:
+            profile = UserProfile.objects.get(user=user)
+            profile.update_engagement_score()
         except UserProfile.DoesNotExist:
-            return []
+            pass
 
-        recommendations = []
+    def process_rebate_payment(self, rebate_id: str) -> dict:
+        """
+        Process a rebate payment.
 
-        # Recommend causes based on preferences
-        if hasattr(profile, 'preferences') and 'preferred_causes' in profile.preferences:
-            top_causes = sorted(
-                profile.preferences['preferred_causes'].items(),
-                key=lambda x: x[1],
-                reverse=True
-            )[:3]
+        Args:
+            rebate_id: ID of the rebate to process
 
-            for cause, score in top_causes:
-                recommendations.append({
-                    'type': 'cause',
-                    'value': cause,
-                    'confidence': min(score / 10.0, 1.0)
-                })
-
-        return recommendations
+        Returns:
+            Dictionary with processing result
+        """
+        # This would integrate with payment processors
+        # For now, it's a placeholder
+        return {
+            'success': True,
+            'message': 'Rebate processing would be implemented here'
+        }
 
 
-class MovementMetricsService:
-    """Service for tracking and updating movement metrics"""
+class CommunityService:
+    """
+    Service class for community-related operations.
+    """
 
-    @staticmethod
-    def update_metrics():
-        """Update all movement metrics"""
-        metrics, created = MovementMetrics.objects.get_or_create(pk=1)
+    @transaction.atomic
+    def create_community_circle(self, name: str, location: str,
+                                leader: User, description: str = '',
+                                focus_areas: list = None) -> dict:
+        """
+        Create a new community circle.
 
-        metrics.total_pledges = KarmaPledge.objects.count()
-        metrics.community_size = UserProfile.objects.count()
-        metrics.impact_stories = KarmaPledge.objects.filter(status='approved').count()
+        Args:
+            name: Circle name
+            location: Circle location
+            leader: Circle leader
+            description: Circle description
+            focus_areas: List of focus areas
 
-        # Calculate global reach
-        global_reach = defaultdict(int)
-        for profile in UserProfile.objects.all():
-            if profile.country:
-                global_reach[profile.country] += 1
+        Returns:
+            Dictionary with creation result
+        """
+        try:
+            # Check if user already leads a circle
+            if CommunityCircle.objects.filter(leader=leader, is_active=True).exists():
+                return {
+                    'success': False,
+                    'error': 'You already lead an active community circle'
+                }
 
-        metrics.global_reach = dict(global_reach)
-        metrics.save()
+            circle = CommunityCircle.objects.create(
+                name=name,
+                location=location,
+                leader=leader,
+                description=description,
+                focus_areas=focus_areas or []
+            )
 
-        return metrics
+            # Update leader's engagement score
+            RenaisGinService()._update_user_engagement(leader)
+
+            return {
+                'success': True,
+                'circle': circle
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    def join_community_circle(self, user: User, circle_id: str) -> dict:
+        """
+        Add a user to a community circle.
+
+        Args:
+            user: User to add
+            circle_id: Circle ID to join
+
+        Returns:
+            Dictionary with join result
+        """
+        try:
+            circle = CommunityCircle.objects.get(id=circle_id, is_active=True)
+
+            if circle.leader == user:
+                return {
+                    'success': False,
+                    'error': 'You are already the leader of this circle'
+                }
+
+            if circle.members.filter(id=user.id).exists():
+                return {
+                    'success': False,
+                    'error': 'You are already a member of this circle'
+                }
+
+            circle.add_member(user)
+
+            # Update user's engagement score
+            RenaisGinService()._update_user_engagement(user)
+
+            return {
+                'success': True,
+                'circle': circle
+            }
+
+        except CommunityCircle.DoesNotExist:
+            return {
+                'success': False,
+                'error': 'Community circle not found'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }

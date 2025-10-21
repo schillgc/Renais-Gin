@@ -1,5 +1,3 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,50 +6,58 @@
     <title>{% block title %}Renais Gin - Craft Your Perfect World{% endblock %}</title>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link href="{% static 'css/renais.css' %}" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
 
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg renais-navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand renais-brand" href="{% url 'core:dashboard' %}">
-                <img src="{% static 'images/renais-logo.jpg' %}" alt="Renais Logo" height="40" class="d-inline-block align-text-top">
-                RENAIS
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-wine-bottle"></i> Renais Gin
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:dashboard' %}">Dashboard</a>
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:register_bottle' %}">Register Bottle</a>
+                        <a class="nav-link" href="{% url 'about' %}">About</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'bottles' %}">Bottles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'karma' %}">Karma</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            {{ user.username }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'admin:logout' %}">Logout</a></li>
-                        </ul>
+                    <li class="nav-item">
+                        <span class="navbar-text me-3">
+                            <i class="fas fa-user"></i> {{ user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin:login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -59,62 +65,44 @@
         </div>
     </nav>
 
-    <!-- Main content -->
-    <main class="container py-5">
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endfor %}
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
 
-        {% block content %}
-        {% endblock %}
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="renais-footer mt-5">
+    <footer class="bg-dark text-light py-4 mt-5">
         <div class="container">
             <div class="row">
-                <div class="col-md-4">
-                    <h5 class="renais-brand">RENAIS</h5>
-                    <p>Craft Your Perfect World</p>
+                <div class="col-md-6">
+                    <h5>Renais Gin</h5>
+                    <p>Craft Your Perfect World. One bottle at a time.</p>
                 </div>
-                <div class="col-md-4">
-                    <h5>Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="https://renais.com/pages/our-story" class="text-light">About Us</a></li>
-                        <li><a href="https://renais.com/pages/process" class="text-light">Our Process</a></li>
-                        <li><a href="https://renais.com/blogs/recipes" class="text-light">Cocktails</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Connect</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="https://www.instagram.com/renaisgin/" class="text-light">Instagram</a></li>
-                        <li><a href="https://x.com/renaisspirits?lang=en" class="text-light">Twitter</a></li>
-                        <li><a href="https://renais.com/pages/contact" class="text-light">Contact Us</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <div class="col text-center">
-                    <p>&copy; 2025 Renais Gin. All rights reserved.</p>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2024 Renais Gin. All rights reserved.</p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts -->
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Custom JS -->
-    <script src="{% static 'js/renais.js' %}"></script>
+    <script src="/static/js/app.js"></script>
 
     {% block extra_js %}{% endblock %}
 </body>
