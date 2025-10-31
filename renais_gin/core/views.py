@@ -33,7 +33,7 @@ def karma_view(request):
     return render(request, 'karma.html')
 
 
-# API views (keep your existing API views)
+# API views
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
