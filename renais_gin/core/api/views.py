@@ -1,3 +1,4 @@
+# core/api/views.py
 """
 API Views for Renais Gin
 REST API endpoints for mobile apps and external services
