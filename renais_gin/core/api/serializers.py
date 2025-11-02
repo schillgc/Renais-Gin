@@ -1,3 +1,4 @@
+# core/api/serializers.py
 """
 Serializers for Renais Gin API
 """
