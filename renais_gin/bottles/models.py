@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 
 class BottleBatch(models.Model):
@@ -23,10 +24,18 @@ class Bottle(models.Model):
     registered_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
                                       related_name='bottles')
     registration_date = models.DateTimeField(null=True, blank=True)
+    # Add pledge-related fields
+    pledge_submitted = models.BooleanField(default=False)
+    pledge_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.bottle_id
+
+    def save(self, *args, **kwargs):
+        if self.is_registered and not self.registration_date:
+            self.registration_date = timezone.now()
+        super().save(*args, **kwargs)
 
 
 class BottleScan(models.Model):
