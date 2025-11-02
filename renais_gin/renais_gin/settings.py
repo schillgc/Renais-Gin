@@ -122,12 +122,40 @@ REST_FRAMEWORK = {
 }
 
 # Renais Gin Custom Settings
+# Renais Gin AI Ecosystem Settings
 RENAIS_SETTINGS = {
-    'REBATE_AMOUNT': 5.00,
-    'AI_VALIDATION_THRESHOLD': 0.6,
-    'COMMUNITY_VALIDATIONS_REQUIRED': 3,
-    'BLOCKCHAIN_MOCK_MODE': True,
-    'QR_CODE_DIR': 'qr_codes/',
+    'AI_VALIDATION': {
+        'SENTIMENT_THRESHOLD': 0.6,
+        'MIN_PLEDGE_LENGTH': 10,
+        'MAX_PLEDGE_LENGTH': 500,
+    },
+    'BLOCKCHAIN': {
+        'NETWORK': 'mock',  # 'mock', 'testnet', 'mainnet'
+        'PROVIDER_URL': None,  # Your blockchain provider URL
+        'CONTRACT_ADDRESS': None,  # Your contract address
+    },
+    'KARMA_ECONOMY': {
+        'REBATE_AMOUNT': 5.00,
+        'VALIDATION_THRESHOLD': 3,
+        'COMMUNITY_REWARD': 1.00,
+    },
+    'QR_CODE': {
+        'SAVE_PATH': 'qr_codes/',
+        'BASE_URL': '/media/qr_codes/',
+    },
+    'IMPACT_CATEGORIES': [
+        'environmental',
+        'community',
+        'education',
+        'other'
+    ]
+}
+
+# Blockchain Settings (for blockchain app)
+BLOCKCHAIN = {
+    'NETWORK': 'mock',
+    'PROVIDER_URL': None,
+    'CONTRACT_ADDRESS': None,
 }
 
 # Logging configuration for development
