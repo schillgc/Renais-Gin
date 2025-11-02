@@ -3,6 +3,7 @@ import qrcode
 from io import BytesIO
 from django.core.files import File
 from django.conf import settings
+from django.utils import timezone
 from .models import Bottle
 
 
