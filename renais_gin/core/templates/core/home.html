@@ -1,182 +1,302 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renais Gin - Craft Your Perfect World</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --renais-primary: #2c5530;
+            --renais-secondary: #6b8e23;
+            --renais-accent: #d4af37;
+            --renais-light: #f8f9fa;
+        }
 
-{% block title %}Renais Gin - Craft Your Perfect World{% endblock %}
+        .bg-renais {
+            background: linear-gradient(135deg, var(--renais-primary) 0%, var(--renais-secondary) 100%);
+        }
 
-{% block content %}
-<!-- Hero Section -->
-<section class="renais-gradient text-light py-5">
-    <div class="container">
-        <div class="row align-items-center min-vh-50">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">
-                    Craft Your <span class="renais-accent">Perfect World</span>
-                </h1>
-                <p class="lead mb-4">
-                    We don't sell gin. We sell a key. A key to a locked room in the human spirit
-                    where the desire to create, to connect, and to leave things better than we found it resides.
-                </p>
-                <div class="d-flex flex-wrap gap-3">
+        .btn-renais {
+            background-color: var(--renais-accent);
+            border-color: var(--renais-accent);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .btn-renais:hover {
+            background-color: #b8941f;
+            border-color: #b8941f;
+            color: #000;
+        }
+
+        .hero-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .movement-stats {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--renais-accent);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body class="bg-renais text-white">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'core:home' %}">
+                <i class="fas fa-leaf me-2"></i>
+                Renais Gin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:about' %}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:impact_stories' %}">Impact Stories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:leaderboard' %}">Leaderboard</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                    <a href="{% url 'dashboard' %}" class="btn btn-renais btn-lg">
-                        <i class="fas fa-tachometer-alt me-2"></i>My Dashboard
-                    </a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:profile' %}">
+                            <i class="fas fa-user me-1"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:logout' %}">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
                     {% else %}
-                    <a href="{% url 'register' %}" class="btn btn-renais btn-lg">
-                        <i class="fas fa-leaf me-2"></i>Join the Movement
-                    </a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:login' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:register' %}">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
                     {% endif %}
-                    <a href="{% url 'movement_dashboard' %}" class="btn btn-outline-light btn-lg">
-                        <i class="fas fa-chart-line me-2"></i>View Impact
-                    </a>
-                </div>
+                </ul>
             </div>
-            <div class="col-lg-6 text-center">
-                <div class="position-relative">
-                    <i class="fas fa-seedling renais-accent" style="font-size: 15rem; opacity: 0.7;"></i>
-                    <div class="position-absolute top-50 start-50 translate-middle">
-                        <i class="fas fa-wine-bottle text-light" style="font-size: 8rem;"></i>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-3 fw-bold mb-4">
+                        Craft Your Perfect World
+                    </h1>
+                    <p class="lead mb-4">
+                        We don't sell gin. We sell a key. A key to a locked room in the human spirit
+                        where the desire to create, to connect, and to leave things better than we found it resides.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'core:dashboard' %}" class="btn btn-renais btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>My Dashboard
+                        </a>
+                        {% else %}
+                        <a href="{% url 'core:register' %}" class="btn btn-renais btn-lg">
+                            <i class="fas fa-leaf me-2"></i>Join the Movement
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'core:impact_stories' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-chart-line me-2"></i>View Impact
+                        </a>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- How It Works -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3">How Renais Works</h2>
-            <p class="lead text-muted">Transform your gin purchase into verified global impact</p>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm impact-card">
-                    <div class="card-body text-center p-4">
-                        <div class="renais-accent mb-3">
-                            <i class="fas fa-qrcode fa-3x"></i>
+                <div class="col-lg-6 text-center">
+                    <div class="position-relative">
+                        <img src="https://via.placeholder.com/500x400/2c5530/ffffff?text=RENAIS+GIN"
+                             alt="Renais Gin Bottle" class="img-fluid rounded-3 shadow-lg">
+                        <div class="position-absolute top-0 start-0 mt-3 ms-3">
+                            <span class="badge bg-warning text-dark fs-6">Craft Your Impact</span>
                         </div>
-                        <h4 class="fw-bold">1. Scan & Register</h4>
-                        <p class="text-muted">
-                            Scan the QR code on your Renais Gin bottle to register it to your account
-                            and unlock your $5 impact rebate.
-                        </p>
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm impact-card">
-                    <div class="card-body text-center p-4">
-                        <div class="renais-accent mb-3">
-                            <i class="fas fa-hand-holding-heart fa-3x"></i>
+    <!-- Movement Stats -->
+    <section class="py-5">
+        <div class="container">
+            <div class="movement-stats">
+                <h2 class="text-center mb-5">Global Movement Impact</h2>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-4">
+                        <div class="stat-number">{{ movement_metrics.total_community|default:"0" }}</div>
+                        <div class="stat-label">Community Members</div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="stat-number">{{ movement_metrics.total_bottles|default:"0" }}</div>
+                        <div class="stat-label">Bottles Registered</div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="stat-number">{{ movement_metrics.total_pledges|default:"0" }}</div>
+                        <div class="stat-label">Karma Pledges</div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="stat-number">${{ movement_metrics.total_impact|default:"0" }}</div>
+                        <div class="stat-label">Total Impact</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-5 bg-dark">
+        <div class="container">
+            <h2 class="text-center mb-5">How Renais Gin Works</h2>
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="bg-light text-dark rounded-3 p-4 h-100">
+                        <i class="fas fa-wine-bottle fa-3x text-renais mb-3"></i>
+                        <h4>1. Purchase & Register</h4>
+                        <p>Buy a bottle of Renais Gin and register it using the unique QR code to join our community.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="bg-light text-dark rounded-3 p-4 h-100">
+                        <i class="fas fa-hand-holding-heart fa-3x text-renais mb-3"></i>
+                        <h4>2. Make a Pledge</h4>
+                        <p>Submit your karma pledge - how you'll use your $5 rebate to create positive impact in the world.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="bg-light text-dark rounded-3 p-4 h-100">
+                        <i class="fas fa-users fa-3x text-renais mb-3"></i>
+                        <h4>3. Community Validation</h4>
+                        <p>Our community validates pledges, ensuring authenticity and collective impact creation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Categories -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Create Impact in Key Areas</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card bg-success text-white h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-tree fa-2x mb-3"></i>
+                            <h5 class="card-title">Environmental</h5>
+                            <p class="card-text">Plant trees, clean oceans, reduce waste, and protect biodiversity.</p>
                         </div>
-                        <h4 class="fw-bold">2. Make a Pledge</h4>
-                        <p class="text-muted">
-                            Submit your sustainability pledge - how you'll use the $5 rebate to create
-                            positive environmental or community impact.
-                        </p>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm impact-card">
-                    <div class="card-body text-center p-4">
-                        <div class="renais-accent mb-3">
-                            <i class="fas fa-users fa-3x"></i>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card bg-primary text-white h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-hands-helping fa-2x mb-3"></i>
+                            <h5 class="card-title">Community</h5>
+                            <p class="card-text">Support local initiatives, help neighbors, and build stronger communities.</p>
                         </div>
-                        <h4 class="fw-bold">3. Community Validation</h4>
-                        <p class="text-muted">
-                            Our AI and community validate your pledge. Upon approval, receive your
-                            $5 rebate and join our global impact story.
-                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card bg-info text-white h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-graduation-cap fa-2x mb-3"></i>
+                            <h5 class="card-title">Education</h5>
+                            <p class="card-text">Fund scholarships, provide resources, and support learning opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card bg-warning text-dark h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-heartbeat fa-2x mb-3"></i>
+                            <h5 class="card-title">Health & Wellness</h5>
+                            <p class="card-text">Support healthcare access, mental health, and wellness programs.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Live Movement Stats -->
-<section class="py-5 renais-gradient text-light">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3">Global Impact in Real Time</h2>
-            <p class="lead">Join thousands creating change worldwide</p>
+    <!-- CTA Section -->
+    <section class="py-5 bg-dark">
+        <div class="container text-center">
+            <h2 class="mb-4">Ready to Craft Your Perfect World?</h2>
+            <p class="lead mb-4">Join thousands of others creating meaningful impact one bottle at a time.</p>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'core:register' %}" class="btn btn-renais btn-lg">
+                <i class="fas fa-leaf me-2"></i>Start Your Journey
+            </a>
+            {% else %}
+            <a href="{% url 'core:dashboard' %}" class="btn btn-renais btn-lg">
+                <i class="fas fa-tachometer-alt me-2"></i>Continue Your Journey
+            </a>
+            {% endif %}
         </div>
+    </section>
 
-        <div class="row text-center g-4">
-            <div class="col-md-3">
-                <div class="p-4">
-                    <i class="fas fa-users fa-2x renais-accent mb-3"></i>
-                    <h3 class="fw-bold display-6" id="total-community-home">0</h3>
-                    <p class="mb-0">Community Members</p>
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-leaf me-2"></i>Renais Gin</h5>
+                    <p>Craft Your Perfect World. One bottle at a time.</p>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="p-4">
-                    <i class="fas fa-hand-holding-heart fa-2x renais-accent mb-3"></i>
-                    <h3 class="fw-bold display-6" id="total-pledges-home">0</h3>
-                    <p class="mb-0">Pledges Made</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="p-4">
-                    <i class="fas fa-check-circle fa-2x renais-accent mb-3"></i>
-                    <h3 class="fw-bold display-6" id="approved-pledges-home">0</h3>
-                    <p class="mb-0">Approved Actions</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="p-4">
-                    <i class="fas fa-dollar-sign fa-2x renais-accent mb-3"></i>
-                    <h3 class="fw-bold display-6" id="total-impact-home">$0</h3>
-                    <p class="mb-0">Total Impact</p>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 Renais Gin. All rights reserved.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-linkedin"></i></a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </footer>
 
-<!-- Call to Action -->
-<section class="py-5 bg-white">
-    <div class="container">
-        <div class="row justify-content-center text-center">
-            <div class="col-lg-8">
-                <h2 class="fw-bold mb-4">Ready to Craft Your Perfect World?</h2>
-                <p class="lead mb-4">
-                    Join our movement of conscious consumers turning everyday purchases into
-                    extraordinary impact.
-                </p>
-                {% if user.is_authenticated %}
-                <a href="{% url 'register_bottle' %}" class="btn btn-renais btn-lg">
-                    <i class="fas fa-qrcode me-2"></i>Register Your Bottle
-                </a>
-                {% else %}
-                <a href="{% url 'register' %}" class="btn btn-renais btn-lg">
-                    <i class="fas fa-user-plus me-2"></i>Join the Movement
-                </a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</section>
-
-<script>
-    // Update home page metrics specifically
-    function updateHomeMetrics() {
-        fetch('/api/metrics/')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('total-community-home').textContent = data.total_community;
-                document.getElementById('total-pledges-home').textContent = data.total_pledges;
-                document.getElementById('approved-pledges-home').textContent = data.approved_pledges;
-                document.getElementById('total-impact-home').textContent = `$${data.total_impact}`;
-            });
-    }
-    document.addEventListener('DOMContentLoaded', updateHomeMetrics);
-</script>
-{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

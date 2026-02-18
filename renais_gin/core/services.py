@@ -6,9 +6,12 @@ import hashlib
 import json
 from datetime import datetime
 from django.db import transaction
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.exceptions import ValidationError
+
+# Use get_user_model() instead of direct User import
+User = get_user_model()
 
 from .models import (
     Bottle, KarmaPledge, PledgeValidation, Rebate,
@@ -38,31 +41,26 @@ class RenaisGinService:
             Dictionary with success status and data/error message
         """
         try:
-            # Check if bottle already exists
-            if Bottle.objects.filter(bottle_id=bottle_data['bottle_id']).exists():
+            # Check if bottle already exists and is unregistered
+            try:
+                bottle = Bottle.objects.get(bottle_id=bottle_data['bottle_id'])
+                if bottle.registered:
+                    return {
+                        'success': False,
+                        'error': 'Bottle ID already registered'
+                    }
+            except Bottle.DoesNotExist:
                 return {
                     'success': False,
-                    'error': 'Bottle ID already registered'
+                    'error': 'Bottle ID not found in system'
                 }
 
-            # Generate QR code for the bottle
-            qr_path = self.ai_core.bottle_manager.generate_bottle_qr(
-                bottle_data['bottle_id'],
-                bottle_data
-            )
-
-            # Create bottle record
-            bottle = Bottle.objects.create(
-                bottle_id=bottle_data['bottle_id'],
-                batch_id=bottle_data['batch_id'],
-                production_date=bottle_data['production_date'],
-                terroir_region=bottle_data.get('terroir_region', 'Chablis'),
-                terroir_vintage=bottle_data.get('terroir_vintage', '2022'),
-                qr_code=qr_path,
-                registered_to=user,
-                registration_date=datetime.now(),
-                status='registered'
-            )
+            # Update bottle registration
+            bottle.registered = True
+            bottle.registered_to = user
+            bottle.registration_date = datetime.now()
+            bottle.status = 'registered'
+            bottle.save()
 
             # Update user engagement score
             self._update_user_engagement(user)
@@ -70,7 +68,7 @@ class RenaisGinService:
             return {
                 'success': True,
                 'bottle': bottle,
-                'qr_code': qr_path
+                'qr_code': bottle.qr_code.url if bottle.qr_code else None
             }
 
         except Exception as e:
@@ -134,6 +132,10 @@ class RenaisGinService:
                 submission_id=submission_id,
                 ai_validation_data=ai_result
             )
+
+            # Update bottle status
+            bottle.status = 'pledged'
+            bottle.save()
 
             # Create rebate record if AI approved
             if ai_result['status'] == 'approved':
@@ -239,22 +241,24 @@ class RenaisGinService:
             Dictionary with user metrics
         """
         try:
-            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile = UserProfile.objects.get(user=user)
             pledges = KarmaPledge.objects.filter(user=user)
             bottles = Bottle.objects.filter(registered_to=user)
             validations_given = PledgeValidation.objects.filter(validator=user)
 
             # Calculate various metrics
-            total_impact = pledges.filter(status='approved').count() * 5  # $5 per approval
+            approved_pledges = pledges.filter(status='approved')
+            total_impact = approved_pledges.count() * settings.RENAIS_SETTINGS['REBATE_AMOUNT']
 
             return {
                 'total_pledges': pledges.count(),
-                'approved_pledges': pledges.filter(status='approved').count(),
+                'approved_pledges': approved_pledges.count(),
                 'pending_pledges': pledges.filter(status='pending').count(),
                 'total_bottles': bottles.count(),
                 'validations_given': validations_given.count(),
                 'engagement_score': profile.engagement_score,
-                'total_impact': total_impact,
+                'karma_score': profile.karma_score,
+                'total_impact': float(total_impact),
                 'preferred_causes': profile.preferred_causes,
                 'member_since': user.date_joined.strftime('%B %Y'),
             }
@@ -273,7 +277,11 @@ class RenaisGinService:
         total_bottles = Bottle.objects.count()
         total_pledges = KarmaPledge.objects.count()
         approved_pledges = KarmaPledge.objects.filter(status='approved').count()
+
+        # FIX: Use get_user_model() instead of direct User import
+        User = get_user_model()
         total_community = User.objects.filter(is_active=True).count()
+
         total_rebates = Rebate.objects.filter(status='completed').count()
 
         # Impact by category
@@ -284,8 +292,9 @@ class RenaisGinService:
         # Community circles stats
         active_circles = CommunityCircle.objects.filter(is_active=True).count()
         total_circle_members = CommunityCircle.objects.aggregate(
-            total_members=Count('members') + Count('id')  # +1 for each leader
+            total_members=Count('members')
         )['total_members'] or 0
+        total_circle_members += active_circles  # Add leaders
 
         return {
             'total_community': total_community,
@@ -293,7 +302,7 @@ class RenaisGinService:
             'total_pledges': total_pledges,
             'approved_pledges': approved_pledges,
             'total_rebates': total_rebates,
-            'total_impact': approved_pledges * 5,  # $5 per rebate
+            'total_impact': approved_pledges * settings.RENAIS_SETTINGS['REBATE_AMOUNT'],
             'active_circles': active_circles,
             'total_circle_members': total_circle_members,
             'impact_by_category': {item['impact_type']: item['count'] for item in impact_by_category},
@@ -338,12 +347,41 @@ class RenaisGinService:
         Returns:
             Dictionary with processing result
         """
-        # This would integrate with payment processors
-        # For now, it's a placeholder
-        return {
-            'success': True,
-            'message': 'Rebate processing would be implemented here'
-        }
+        try:
+            rebate = Rebate.objects.get(id=rebate_id)
+
+            if rebate.status != 'pending':
+                return {
+                    'success': False,
+                    'error': f'Rebate already {rebate.status}'
+                }
+
+            # Mark as processing
+            rebate.mark_processing()
+
+            # Simulate payment processing
+            # In production, integrate with actual payment processor
+            transaction_id = f"TXN_{rebate.id.hex[:8]}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
+            # Mark as completed
+            rebate.mark_completed(transaction_id)
+
+            return {
+                'success': True,
+                'rebate': rebate,
+                'transaction_id': transaction_id
+            }
+
+        except Rebate.DoesNotExist:
+            return {
+                'success': False,
+                'error': 'Rebate not found'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
 
 
 class CommunityService:
@@ -428,6 +466,50 @@ class CommunityService:
 
             # Update user's engagement score
             RenaisGinService()._update_user_engagement(user)
+
+            return {
+                'success': True,
+                'circle': circle
+            }
+
+        except CommunityCircle.DoesNotExist:
+            return {
+                'success': False,
+                'error': 'Community circle not found'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    def leave_community_circle(self, user: User, circle_id: str) -> dict:
+        """
+        Remove a user from a community circle.
+
+        Args:
+            user: User to remove
+            circle_id: Circle ID to leave
+
+        Returns:
+            Dictionary with leave result
+        """
+        try:
+            circle = CommunityCircle.objects.get(id=circle_id, is_active=True)
+
+            if circle.leader == user:
+                return {
+                    'success': False,
+                    'error': 'Leaders cannot leave their circle. Transfer leadership first.'
+                }
+
+            if not circle.members.filter(id=user.id).exists():
+                return {
+                    'success': False,
+                    'error': 'You are not a member of this circle'
+                }
+
+            circle.remove_member(user)
 
             return {
                 'success': True,

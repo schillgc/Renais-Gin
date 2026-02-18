@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Community Pledges - Renais Gin{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero text-center mb-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Community Pledges</h1>
+        <p class="lead">Help validate community impact pledges to earn karma</p>
+        <div class="mt-3">
+            <span class="badge bg-warning text-dark fs-5">{{ total_pending }} Pledges Awaiting Validation</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> How Validation Works</h5>
+                <ul class="mb-0">
+                    <li>Review each pledge carefully for authenticity and positive impact</li>
+                    <li>Approve pledges that show genuine commitment to making a difference</li>
+                    <li>Pledges need 3 approvals to be accepted</li>
+                    <li>Earn +1 karma point for each validation you complete</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {% if page_obj %}
+    <div class="row">
+        {% for pledge in page_obj %}
+        <div class="col-md-6 mb-4">
+            <div class="renais-card card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ pledge.user.username }}</strong>
+                        <span class="badge bg-info ms-2">{{ pledge.get_impact_type_display }}</span>
+                    </div>
+                    <small class="text-muted">{{ pledge.timestamp|timesince }} ago</small>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Bottle {{ pledge.bottle.bottle_id }}</h5>
+
+                    <h6 class="mt-3">Pledge:</h6>
+                    <p class="card-text">{{ pledge.pledge_text }}</p>
+
+                    <h6 class="mt-3">Impact Plan:</h6>
+                    <p class="card-text">{{ pledge.impact_plan }}</p>
+
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">
+                                <i class="fas fa-thumbs-up"></i> {{ pledge.approvals }} approval{{ pledge.approvals|pluralize }}
+                            </span>
+                            <span class="text-muted">
+                                <i class="fas fa-comment"></i> {{ pledge.validations|length }} validation{{ pledge.validations|length|pluralize }}
+                            </span>
+                        </div>
+
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: {{ pledge.approvals|multiply:33.33 }}%"
+                                 aria-valuenow="{{ pledge.approvals }}" aria-valuemin="0" aria-valuemax="3">
+                            </div>
+                        </div>
+                        <small class="text-muted">{{ pledge.approvals }}/3 approvals needed</small>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'core:validate_pledge' pledge.id %}" class="btn renais-btn-primary w-100">
+                        <i class="fas fa-check-circle"></i> Validate This Pledge
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Pledge navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="row">
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+            <h3 class="mt-3">All Caught Up!</h3>
+            <p class="lead">There are no pledges waiting for validation right now.</p>
+            <a href="{% url 'core:impact_stories' %}" class="btn renais-btn-primary">
+                View Approved Impact Stories
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

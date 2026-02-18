@@ -1,17 +1,16 @@
-import os
+﻿"""
+Django settings for renais_gin project.
+"""
+
 from pathlib import Path
+import os
 from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-development-key-change-in-production-for-renais-gin-2024'
-
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = 'dev-key-change-in-production-!@#$%^&*()'
 DEBUG = True
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -22,19 +21,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Third-party apps
+    # Third party
     'rest_framework',
-    'crispy_forms',
-    'crispy_bootstrap5',
-    'debug_toolbar',
-    'django_extensions',
-    'django_filters',
+    'drf_yasg',
+    'corsheaders',
 
     # Local apps
-    'core',
+    'core.apps.CoreConfig',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -42,7 +39,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'renais_gin.urls'
@@ -50,7 +46,7 @@ ROOT_URLCONF = 'renais_gin.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -58,6 +54,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.movement_metrics',
+                'core.context_processors.user_context',
             ],
         },
     },
@@ -72,6 +70,9 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Custom User Model
+AUTH_USER_MODEL = 'core.User'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -97,8 +98,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Media files
 MEDIA_URL = '/media/'
@@ -107,58 +108,85 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Crispy Forms
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
+# Renais Gin Custom Settings
+RENAIS_SETTINGS = {
+    'BLOCKCHAIN_MOCK_MODE': True,
+    'QR_CODE_DIR': 'qr_codes/',
+    'COMMUNITY_VALIDATIONS_REQUIRED': 3,
+    'AI_VALIDATION_THRESHOLD': 0.7,
+    'REBATE_AMOUNT': 5.00,
+    'MAX_PLEDGE_LENGTH': 500,
+    'MAX_IMPACT_PLAN_LENGTH': 500,
+}
 
-# Django REST Framework
+# REST Framework
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
 }
 
-# Renais Gin Custom Settings
-# Renais Gin AI Ecosystem Settings
-RENAIS_SETTINGS = {
-    'AI_VALIDATION': {
-        'SENTIMENT_THRESHOLD': 0.6,
-        'MIN_PLEDGE_LENGTH': 10,
-        'MAX_PLEDGE_LENGTH': 500,
-    },
-    'BLOCKCHAIN': {
-        'NETWORK': 'mock',  # 'mock', 'testnet', 'mainnet'
-        'PROVIDER_URL': None,  # Your blockchain provider URL
-        'CONTRACT_ADDRESS': None,  # Your contract address
-    },
-    'KARMA_ECONOMY': {
-        'REBATE_AMOUNT': 5.00,
-        'VALIDATION_THRESHOLD': 3,
-        'COMMUNITY_REWARD': 1.00,
-    },
-    'QR_CODE': {
-        'SAVE_PATH': 'qr_codes/',
-        'BASE_URL': '/media/qr_codes/',
-    },
-    'IMPACT_CATEGORIES': [
-        'environmental',
-        'community',
-        'education',
-        'other'
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# Email Settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@renaisgin.com'
+
+# Celery Configuration (Optional - for background tasks)
+CELERY_BROKER_URL = 'redis://localhost:6379/0' if not DEBUG else 'memory://'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0' if not DEBUG else 'cache+memory://'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# Admin URL
+ADMIN_URL = 'admin/'
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# Debug Toolbar Configuration
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+
+    # Debug Toolbar settings
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+    }
+
+    # Internal IPs for Debug Toolbar
+    INTERNAL_IPS = [
+        '127.0.0.1',
+        'localhost',
     ]
-}
 
-# Blockchain Settings (for blockchain app)
-BLOCKCHAIN = {
-    'NETWORK': 'mock',
-    'PROVIDER_URL': None,
-    'CONTRACT_ADDRESS': None,
-}
-
-# Logging configuration for development
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -175,11 +203,6 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False,
-        },
-        'core': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
             'propagate': False,
         },
     },

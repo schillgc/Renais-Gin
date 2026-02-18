@@ -51,36 +51,45 @@ class RenaissanceBottleManager:
     def __init__(self):
         self.bottle_db = {}
         self.qr_codes = {}
-        qr_code_dir = settings.MEDIA_ROOT / settings.RENAIS_SETTINGS['QR_CODE_DIR']
+        qr_code_dir = settings.MEDIA_ROOT / 'qr_codes'
         os.makedirs(qr_code_dir, exist_ok=True)
 
-    def generate_bottle_qr(self, bottle_id: str, batch_info: Dict) -> str:
+    def generate_bottle_qr(self, bottle_id: str, bottle_data: Dict) -> str:
         """Generate QR code for a bottle with embedded information"""
-        bottle_data = {
+        # Create QR code data
+        qr_data = {
             'bottle_id': bottle_id,
-            'batch_id': batch_info['batch_id'],
-            'production_date': batch_info['production_date'].isoformat() if hasattr(batch_info['production_date'],
-                                                                                    'isoformat') else batch_info[
-                'production_date'],
-            'terroir_data': {
-                'region': batch_info.get('terroir_region', ''),
-                'vintage': batch_info.get('terroir_vintage', '')
-            }
+            'batch_id': bottle_data['batch_id'],
+            'production_date': bottle_data['production_date'],
+            'terroir_region': bottle_data.get('terroir_region', ''),
+            'terroir_vintage': bottle_data.get('terroir_vintage', ''),
+            'type': 'renais_gin',
+            'timestamp': datetime.now().isoformat()
         }
 
         # Create QR code
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(json.dumps(bottle_data))
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=5,
+        )
+        qr.add_data(json.dumps(qr_data))
         qr.make(fit=True)
 
-        img = qr.make_image(fill='black', back_color='white')
-        img_path = settings.MEDIA_ROOT / settings.RENAIS_SETTINGS['QR_CODE_DIR'] / f"{bottle_id}.png"
+        img = qr.make_image(fill_color='black', back_color='white')
+
+        # Ensure media directory exists
+        qr_dir = settings.MEDIA_ROOT / 'qr_codes'
+        os.makedirs(qr_dir, exist_ok=True)
+
+        img_path = qr_dir / f"{bottle_id}.png"
         img.save(img_path)
 
-        self.bottle_db[bottle_id] = bottle_data
+        self.bottle_db[bottle_id] = qr_data
         self.qr_codes[bottle_id] = str(img_path)
 
-        return str(img_path)
+        return f"qr_codes/{bottle_id}.png"
 
     def process_bottle_scan(self, bottle_id: str, user_id: str) -> Dict:
         """Process when a user scans a bottle QR code"""
@@ -89,15 +98,8 @@ class RenaissanceBottleManager:
 
         bottle_data = self.bottle_db[bottle_id]
 
-        # Check if this bottle has already been registered
-        if 'registered' in bottle_data and bottle_data['registered']:
-            return {"error": "Bottle already registered"}
-
-        # Register bottle to user
-        bottle_data['registered'] = True
-        bottle_data['registered_to'] = user_id
-        bottle_data['registration_date'] = datetime.now().isoformat()
-
+        # In a real implementation, we'd check the database
+        # For now, return success with bottle data
         return {
             "status": "success",
             "bottle_data": bottle_data,
@@ -225,7 +227,7 @@ class StoryCurationAgent:
 
         recent_stories = [
             s for s in self.story_db
-            if s['metadata']['timestamp'] > cutoff_date
+            if datetime.fromisoformat(s['metadata']['timestamp']) > cutoff_date
         ]
 
         impact_categories = defaultdict(int)

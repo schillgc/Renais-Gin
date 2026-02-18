@@ -23,8 +23,20 @@ env/
 .DS_Store
 Thumbs.db
 
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
 # Celery
 celerybeat-schedule
 
 # Jupyter
 .ipynb_checkpoints
+
+# Logs
+logs/
+*.log
+
+# PyCharm
+.idea

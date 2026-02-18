@@ -1,3 +1,4 @@
+<!-- about.html - Fix line 55 -->
 {% extends 'base.html' %}
 
 {% block title %}About - Renais Gin{% endblock %}
@@ -52,7 +53,8 @@
             <div class="text-center mt-5">
                 <h3>Ready to Make a Difference?</h3>
                 <p class="lead">Join thousands of others who are turning their gin enjoyment into global impact.</p>
-                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Join the Movement</a>
+                <!-- FIXED: Changed from 'register_view' to 'register' -->
+                <a href="{% url 'core:register' %}" class="btn btn-primary btn-lg">Join the Movement</a>
             </div>
         </div>
     </div>
