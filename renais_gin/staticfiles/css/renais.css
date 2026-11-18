@@ -1,0 +1,322 @@
+/* Renais Gin Custom Styles */
+:root {
+    --renais-dark: #1a1f36;
+    --renais-dark-alt: #2d3748;
+    --renais-gold: #d4af37;
+    --renais-gold-light: #f7ef8a;
+    --renais-gold-dark: #b8941f;
+    --renais-success: #10b981;
+    --renais-info: #3b82f6;
+    --renais-warning: #f59e0b;
+    --renais-danger: #ef4444;
+}
+
+/* Base Styles */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+}
+
+.renais-gradient {
+    background: linear-gradient(135deg, var(--renais-dark) 0%, var(--renais-dark-alt) 100%) !important;
+}
+
+.renais-accent {
+    color: var(--renais-gold) !important;
+}
+
+.bg-renais {
+    background-color: var(--renais-dark) !important;
+}
+
+.text-renais {
+    color: var(--renais-gold) !important;
+}
+
+/* Buttons */
+.btn-renais {
+    background: linear-gradient(135deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    border: none;
+    color: var(--renais-dark);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-renais:hover {
+    background: linear-gradient(135deg, var(--renais-gold-dark) 0%, var(--renais-gold-light) 100%);
+    color: var(--renais-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-renais:active {
+    transform: translateY(0);
+}
+
+.btn-outline-renais {
+    border: 2px solid var(--renais-gold);
+    color: var(--renais-gold);
+    background: transparent;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-renais:hover {
+    background: var(--renais-gold);
+    color: var(--renais-dark);
+    transform: translateY(-2px);
+}
+
+/* Cards */
+.impact-card {
+    border: none;
+    border-left: 4px solid var(--renais-gold);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.impact-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.impact-card .card-header {
+    background: linear-gradient(135deg, var(--renais-dark) 0%, var(--renais-dark-alt) 100%);
+    color: white;
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.impact-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Navigation */
+.nav-gradient {
+    background: linear-gradient(90deg, var(--renais-dark) 0%, var(--renais-dark-alt) 100%);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--renais-gold);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: var(--renais-gold);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Footer */
+.footer-gradient {
+    background: linear-gradient(90deg, var(--renais-dark-alt) 0%, var(--renais-dark) 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Badges */
+.badge-renais {
+    background: linear-gradient(135deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    color: var(--renais-dark);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+}
+
+/* Progress Bars */
+.progress-renais {
+    height: 0.5rem;
+    border-radius: 1rem;
+    background-color: #e5e7eb;
+    overflow: hidden;
+}
+
+.progress-renais .progress-bar {
+    background: linear-gradient(90deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    border-radius: 1rem;
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: var(--renais-gold);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--renais-gold);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: var(--renais-gold);
+    border-color: var(--renais-gold);
+}
+
+/* Alert Styles */
+.alert-renais {
+    background: linear-gradient(135deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    color: var(--renais-dark);
+    border: none;
+    border-radius: 1rem;
+    border-left: 4px solid var(--renais-gold-dark);
+}
+
+/* Loading Spinner */
+.spinner-renais {
+    color: var(--renais-gold);
+}
+
+/* Stats Counter */
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--renais-gold) 0%, var(--renais-gold-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/static/images/pattern.svg') repeat;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+/* Animation Classes */
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse-renais {
+    animation: pulseRenais 2s infinite;
+}
+
+@keyframes pulseRenais {
+    0% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(212, 175, 55, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+    }
+}
+
+/* QR Code Styling */
+.qr-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--renais-gold);
+}
+
+/* Impact Categories */
+.impact-environmental {
+    border-left-color: var(--renais-success) !important;
+}
+
+.impact-community {
+    border-left-color: var(--renais-info) !important;
+}
+
+.impact-education {
+    border-left-color: var(--renais-warning) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 60vh;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .impact-card {
+        margin-bottom: 1rem;
+    }
+
+    .btn-renais {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #0f172a;
+        color: #e2e8f0;
+    }
+
+    .card {
+        background-color: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .text-muted {
+        color: #94a3b8 !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .footer,
+    .btn {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+}
