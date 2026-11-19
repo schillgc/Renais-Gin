@@ -30,12 +30,18 @@ jobs:
 
       - name: Check Django configuration
         working-directory: renais_gin
+        env:
+          DJANGO_SETTINGS_MODULE: renais_gin.settings.testing
         run: python manage.py check
 
       - name: Check migration state without modifying the database
         working-directory: renais_gin
+        env:
+          DJANGO_SETTINGS_MODULE: renais_gin.settings.testing
         run: python manage.py makemigrations --check --dry-run
 
       - name: Run Django tests
         working-directory: renais_gin
+        env:
+          DJANGO_SETTINGS_MODULE: renais_gin.settings.testing
         run: python manage.py test core.tests
