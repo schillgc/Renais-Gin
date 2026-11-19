@@ -62,8 +62,8 @@ pip install -r requirements.txt
 
 4. **Configure environment variables**
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+Set the required variables in your shell or deployment platform (see `.env.example`).
+# Do not commit real secret values.
 ```
 
 5. **Run migrations**
@@ -137,12 +137,10 @@ The application uses multiple layers of validation:
 ### Environment Variables
 
 ```ini
-DEBUG=True
-SECRET_KEY=your-secret-key-here
-DATABASE_URL=psql://user:pass@localhost:5432/renais_gin
-REDIS_URL=redis://localhost:6379/0
-ALLOWED_HOSTS=localhost,127.0.0.1,.yourdomain.com
-BLOCKCHAIN_PROVIDER=https://mainnet.infura.io/v3/your-project-id
+DJANGO_SECRET_KEY=<generate-a-new-random-secret>
+DJANGO_DEBUG=false
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+# Configure optional service credentials separately in your deployment environment.
 ```
 
 ### Settings Overview
