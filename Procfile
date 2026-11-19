@@ -1,1 +1,1 @@
-web: gunicorn renais-gin.wsgi --log-file -
+web: cd renais_gin && gunicorn renais_gin.wsgi:application --log-file -

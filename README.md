@@ -62,28 +62,28 @@ pip install -r requirements.txt
 
 4. **Configure environment variables**
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+Set the required variables in your shell or deployment platform (see `.env.example`).
+# Do not commit real secret values.
 ```
 
 5. **Run migrations**
 ```bash
-python manage.py migrate
+python renais_gin/manage.py migrate
 ```
 
 6. **Create superuser**
 ```bash
-python manage.py createsuperuser
+python renais_gin/manage.py createsuperuser
 ```
 
 7. **Load sample data**
 ```bash
-python manage.py add_test_bottles --count 10
+python renais_gin/manage.py add_test_bottles --count 10
 ```
 
 8. **Run development server**
 ```bash
-python manage.py runserver
+python renais_gin/manage.py runserver
 ```
 
 Visit `http://localhost:8000` to see the application in action!
@@ -137,12 +137,10 @@ The application uses multiple layers of validation:
 ### Environment Variables
 
 ```ini
-DEBUG=True
-SECRET_KEY=your-secret-key-here
-DATABASE_URL=psql://user:pass@localhost:5432/renais_gin
-REDIS_URL=redis://localhost:6379/0
-ALLOWED_HOSTS=localhost,127.0.0.1,.yourdomain.com
-BLOCKCHAIN_PROVIDER=https://mainnet.infura.io/v3/your-project-id
+DJANGO_SECRET_KEY=<generate-a-new-random-secret>
+DJANGO_DEBUG=false
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+# Configure optional service credentials separately in your deployment environment.
 ```
 
 ### Settings Overview
@@ -159,14 +157,14 @@ Run the test suite to ensure everything works correctly:
 
 ```bash
 # Run all tests
-python manage.py test
+python renais_gin/manage.py test
 
 # Run with coverage reporting
-coverage run manage.py test
+coverage run python renais_gin/manage.py test
 coverage report
 
 # Run specific test module
-python manage.py test core.tests.test_views
+python renais_gin/manage.py test core.tests.test_views
 ```
 
 ### Testing the AI Validation
@@ -175,7 +173,7 @@ To test the pledge validation system:
 
 1. Register a test bottle:
 ```bash
-python manage.py add_test_bottles --count 5
+python renais_gin/manage.py add_test_bottles --count 5
 ```
 
 2. Use this approved pledge format for testing:
@@ -195,7 +193,7 @@ python manage.py collectstatic
 ```
 3. **Set up database**
 ```bash
-python manage.py migrate
+python renais_gin/manage.py migrate
 ```
 4. **Configure WSGI server** (Gunicorn recommended)
 5. **Set up reverse proxy** (Nginx recommended)
