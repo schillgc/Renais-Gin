@@ -648,3 +648,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# Never track local settings backups; they can retain historical credentials.
+/renais_gin/**/*.bak
+/renais_gin/**/*.backup
