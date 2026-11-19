@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
 from django.utils import timezone
 from .models import Bottle, KarmaPledge, UserProfile, MovementMetrics
 from .services import KarmaValidationService, PersonalizationService, MovementMetricsService
@@ -160,18 +160,18 @@ def validate_pledge(request, pledge_id):
     return render(request, 'core/validate_pledge.html', context)
 
 
-@csrf_exempt
+@require_GET
 def api_movement_metrics(request):
-    """API endpoint for movement metrics"""
-    metrics = MovementMetricsService.update_metrics()
+    """Return the last stored aggregate without mutating metrics on a public request."""
+    metrics = MovementMetrics.objects.filter(pk=1).first()
 
     data = {
-        'total_pledges': metrics.total_pledges,
-        'total_rebates': metrics.total_rebates,
-        'community_size': metrics.community_size,
-        'impact_stories': metrics.impact_stories,
-        'global_reach': metrics.global_reach,
-        'last_updated': metrics.last_updated.isoformat(),
+        'total_pledges': metrics.total_pledges if metrics else 0,
+        'total_rebates': metrics.total_rebates if metrics else 0,
+        'community_size': metrics.community_size if metrics else 0,
+        'impact_stories': metrics.impact_stories if metrics else 0,
+        'global_reach': metrics.global_reach if metrics else {},
+        'last_updated': metrics.last_updated.isoformat() if metrics else None,
     }
 
     return JsonResponse(data)
