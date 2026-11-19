@@ -4,9 +4,25 @@ Production-specific settings for Renais Gin.
 
 from .base import *
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 # Debug settings
 DEBUG = False
+
+# Production must never inherit the development signing key or wildcard hosts.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
+if not SECRET_KEY:
+    raise ImproperlyConfigured('DJANGO_SECRET_KEY must be set for production.')
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+    if host.strip()
+]
+if not ALLOWED_HOSTS or '*' in ALLOWED_HOSTS:
+    raise ImproperlyConfigured(
+        'DJANGO_ALLOWED_HOSTS must contain explicit production hostnames; wildcard hosts are not allowed.'
+    )
 
 # Security settings
 SECURE_SSL_REDIRECT = True
