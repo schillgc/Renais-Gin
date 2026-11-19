@@ -281,3 +281,7 @@ For support and questions:
 ---
 
 *This project is not affiliated with Renais Gin or its parent company. It is an open-source demonstration of sustainable technology integration in the spirits industry.*
+
+## Current branch and integration status
+
+The default branch contains the current security-hardened settings baseline. A separate `full` branch holds a larger application expansion, but it is not approved for direct merging or deployment until its configuration, generated artifacts, dependencies, migrations, and application behavior pass the gates in [the integration review](docs/full-branch-integration-review.md). Do not use that branch as a production release.
