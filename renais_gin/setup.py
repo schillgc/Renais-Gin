@@ -7,7 +7,7 @@ import sys
 
 
 def run(*args):
-    print("\\n> " + " ".join(args), flush=True)
+    print("\n> " + " ".join(args), flush=True)
     subprocess.run(args, check=True)
 
 
@@ -32,7 +32,7 @@ def main():
     run(sys.executable, str(manage_py), "collectstatic", "--noinput")
 
     print(
-        "\\nSetup complete. Create an administrator interactively with "
+        "\nSetup complete. Create an administrator interactively with "
         "'python manage.py createsuperuser', then run 'python manage.py runserver'."
     )
 
