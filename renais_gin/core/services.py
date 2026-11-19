@@ -1,4 +1,3 @@
-import numpy as np
 from collections import defaultdict
 from datetime import datetime, timedelta
 from .models import KarmaPledge, MovementMetrics, UserProfile
