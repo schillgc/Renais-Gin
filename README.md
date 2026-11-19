@@ -4,7 +4,7 @@
 [![Django Version](https://img.shields.io/badge/django-5.2%2B-green)](https://www.djangoproject.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A transformative Django web application that turns premium gin consumption into a global sustainability movement. Renais Gin combines blockchain technology, AI validation, and community engagement to create a participatory ecosystem where every bottle purchase contributes to positive global impact.
+A Django demonstration of bottle registration, sustainability pledges, community review, and aggregate movement metrics. The current default branch is a prototype: it does not execute blockchain transactions, call an AI model, or issue financial rebates. Product claims and impact records are not independently verified.
 
 ## 🌟 Vision
 
@@ -14,18 +14,18 @@ A transformative Django web application that turns premium gin consumption into 
 
 ### 🍾 Digital-Physical Integration
 - **QR Code Authentication**: Each bottle features a unique QR code linking physical products to digital experiences
-- **Blockchain Verification**: Immutable recording of sustainability pledges on the blockchain
-- **Smart Rebate System**: $5 rebate program tied to verified environmental actions
+- **Bottle records and QR codes**: Local Django records can generate a QR image for a bottle.
+- **Pledge workflow**: Submitted pledges enter a review queue; the application does not issue or transfer money.
 
-### 🤖 AI-Powered Validation
-- **Sentiment Analysis**: Natural language processing to validate pledge authenticity
-- **Karma Economy**: Community-driven validation system requiring peer approval
-- **Impact Categorization**: Automatic classification of pledges into environmental, community, or educational impact
+### Pledge pre-screening prototype
+- **Text heuristic**: A small keyword/length heuristic rejects some submissions. It is not an AI model, fraud detector, or proof of authenticity.
+- **Community review**: A Django account can validate a given pledge once; three positive votes change its status to approved.
+- **Impact categorization**: A simple keyword classifier assigns an environmental, community, education, or other label.
 
 ### 🌍 Sustainability Focus
 - **Terroir Tracking**: Detailed geographical and agricultural data for each batch
 - **Impact Metrics**: Real-time dashboard showing global community impact
-- **Circular Economy**: Upcycled grape usage from renowned wine regions
+- **Data provenance**: Terroir/product fields are stored as supplied; the application does not independently verify sourcing or sustainability claims.
 
 ### 👥 Community Ecosystem
 - **Renais Circles**: User-led local chapters for community action
@@ -121,16 +121,15 @@ renais-gin/
 ### Bottle Registration Flow
 1. **Scan QR Code**: Users scan the QR code on their Renais Gin bottle
 2. **Terroir Verification**: System verifies bottle authenticity and displays terroir data
-3. **Pledge Creation**: User submits a sustainability pledge for their $5 rebate
-4. **Community Validation**: Pledge is validated by the community through the Karma system
-5. **Rebate Processing**: Upon approval, rebate is processed and impact is recorded
+3. **Pledge Creation**: The account holder submits a sustainability pledge for a registered bottle.
+4. **Community Review**: The heuristic pre-screen can reject a submission; otherwise it remains in review until three distinct authenticated accounts approve it.
+5. **Review Completion**: Approval changes the pledge status only. No rebate is paid and `rebate_processed` remains false because no payment integration exists.
 
-### AI Validation System
-The application uses multiple layers of validation:
-- **Sentiment Analysis**: NLP algorithms assess pledge authenticity
-- **Pattern Recognition**: Identifies high-quality impact commitments
-- **Community Governance**: Distributed validation through peer review
-- **Blockchain Recording**: Immutable record of all validated pledges
+### Validation boundaries
+- The preliminary text screen is a deterministic keyword/length heuristic, not AI or machine learning.
+- A heuristic result cannot approve a pledge. Accepted submissions enter the `needs_review` state.
+- Community approval requires three positive votes from distinct Django accounts. The application does not establish that accounts represent unique real-world people or prevent coordinated voting across accounts.
+- Approval does not trigger a payment or external blockchain transaction.
 
 ## 🔧 Configuration
 
@@ -145,42 +144,21 @@ DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 
 ### Settings Overview
 
-The project uses a modular settings structure:
-- `base.py`: Core settings shared across all environments
-- `development.py`: Development-specific settings
-- `production.py`: Production configuration
-- `test.py`: Testing environment settings
+The default branch currently uses a single environment-driven settings module at `renais_gin/renais_gin/settings.py`. The test suite uses `renais_gin/renais_gin/test_settings.py` with an in-memory SQLite database. Do not assume the older modular settings layout described by previous project scaffolding is present.
 
 ## 🧪 Testing
 
-Run the test suite to ensure everything works correctly:
+Run the current domain tests from the `renais_gin/` directory with the isolated settings module:
 
 ```bash
-# Run all tests
-python renais_gin/manage.py test
-
-# Run with coverage reporting
-coverage run python renais_gin/manage.py test
-coverage report
-
-# Run specific test module
-python renais_gin/manage.py test core.tests.test_views
+python manage.py test core --settings=renais_gin.test_settings --verbosity 2
 ```
 
-### Testing the AI Validation
+The suite uses an in-memory database and tests pledge submission/review integrity, one-vote-per-account enforcement, non-payment on approval, and the read-only public metrics endpoint. CI installs only the small runtime needed for these tests.
 
-To test the pledge validation system:
+### Testing the pledge workflow
 
-1. Register a test bottle:
-```bash
-python renais_gin/manage.py add_test_bottles --count 5
-```
-
-2. Use this approved pledge format for testing:
-```python
-pledge_text = "I pledge to use this $5 rebate to purchase and plant 10 native oak and maple saplings in partnership with the city's 'ReGreen Our Parks' initiative."
-impact_plan = "I will coordinate with the Parks Department to confirm their planting schedule, purchase saplings at the local conservation nursery, and organize a community planting day within the next 30 days."
-```
+The domain test suite creates a bottle and pledge in a disposable in-memory database. It confirms that even a high-scoring heuristic submission remains `needs_review`, that one account cannot vote twice, and that three distinct positive votes can approve a pledge without marking a rebate as paid. The test data is synthetic; no live provider or payment account is called.
 
 ## 🚀 Deployment
 
@@ -212,12 +190,13 @@ docker-compose up web worker redis
 
 ## 📊 API Endpoints
 
-The application provides RESTful API endpoints:
+The current routes are Django page/form endpoints plus one JSON metrics endpoint:
 
-- `GET /api/bottles/` - List registered bottles
-- `POST /api/pledges/` - Create a new pledge
-- `GET /api/metrics/` - Get movement metrics
-- `GET /api/impact/` - Get impact statistics
+- `GET /api/metrics/` — return the last stored aggregate snapshot. This endpoint is read-only; it does not recalculate or write metrics.
+- `POST /register-bottle/` — authenticated bottle registration form.
+- `POST /submit-pledge/<bottle_id>/` — authenticated pledge form for a bottle registered to the current account.
+- `GET` / `POST /validate-pledge/<pledge_id>/` — authenticated community review form; each account can vote once per pledge.
+- `GET /download-pdf/<pdf_id>/` — authenticated download limited to the owning account.
 
 ### Example API Usage
 
