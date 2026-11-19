@@ -20,4 +20,4 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run isolated settings contract tests
-        run: python -m unittest discover -s renais_gin -p "test_settings_security.py" -v
+        run: python -m unittest discover -s renais_gin -p "test_*.py" -v
