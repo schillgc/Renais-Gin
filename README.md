@@ -1,7 +1,7 @@
 # Renais Gin: Craft Your Perfect World 🍸✨
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
-[![Django Version](https://img.shields.io/badge/django-5.2%2B-green)](https://www.djangoproject.com/)
+[![Python Version](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
+[![Django Version](https://img.shields.io/badge/django-5.2.19-green)](https://www.djangoproject.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Django demonstration of bottle registration, sustainability pledges, community review, and aggregate movement metrics. The current default branch is a prototype: it does not execute blockchain transactions, call an AI model, or issue financial rebates. Product claims and impact records are not independently verified.
@@ -36,7 +36,7 @@ A Django demonstration of bottle registration, sustainability pledges, community
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.12 (the maintained CI and domain-test baseline)
 - PostgreSQL (recommended) or SQLite
 - Redis (for celery tasks)
 - Node.js (for frontend assets)
