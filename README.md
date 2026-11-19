@@ -265,11 +265,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For support and questions:
 - 📧 Email: support@renaisgin.com
 - 🐛 [Issue Tracker](https://github.com/schillgc/renais-gin/issues)
-- 💬 [Community Forum](https://community.renaisgin.com)
+- 💬 [Community Forum](https://community.renais.com)
 
 ## 🌐 Connect
 
-- 🌍 [Official Website](https://www.renaisgin.com)
+- 🌍 [Official Website](https://www.renais.com)
 - 📷 [Instagram](https://instagram.com/renaisgin)
 - 🐦 [Twitter](https://twitter.com/renaisgin)
 - 📖 [Documentation](https://docs.renaisgin.com)
