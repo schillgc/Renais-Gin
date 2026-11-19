@@ -1,0 +1,50 @@
+name: Renais Gin domain integrity tests
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "renais_gin/core/**"
+      - "renais_gin/renais_gin/**"
+      - "renais_gin/renais_gin/test_settings.py"
+      - ".github/workflows/renais-gin-domain-tests.yml"
+      - "requirements.txt"
+  pull_request:
+    branches: [master]
+    paths:
+      - "renais_gin/core/**"
+      - "renais_gin/renais_gin/**"
+      - "renais_gin/test_settings.py"
+      - ".github/workflows/renais-gin-domain-tests.yml"
+      - "requirements.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: renais-gin-domain-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  domain-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: renais_gin
+    env:
+      DJANGO_SECRET_KEY: ci-only-not-a-deployment-secret
+      DJANGO_DEBUG: "true"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the Django domain-test runtime
+        run: python -m pip install "Django==5.2.6" "Pillow==11.3.0" "qrcode==8.2"
+      - name: Compile the maintained Django application
+        run: python -m compileall -q core renais_gin
+      - name: Run migrations and domain integrity tests in memory
+        run: python manage.py test core --settings=renais_gin.test_settings --verbosity 2
