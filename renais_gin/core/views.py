@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.db import transaction
+from django.views.decorators.http import require_GET, require_http_methods
 from django.utils import timezone
 from .models import Bottle, KarmaPledge, UserProfile, MovementMetrics
 from .services import KarmaValidationService, PersonalizationService, MovementMetricsService
@@ -88,18 +89,16 @@ def submit_pledge(request, bottle_id):
         # Create the pledge
         impact_type = KarmaValidationService.classify_impact_type(impact_plan)
 
+        # The keyword/length heuristic is only a pre-screen. It cannot approve
+        # a real-world claim or substitute for independent community review.
         pledge = KarmaPledge(
             user=request.user,
             bottle=bottle,
             pledge_text=pledge_text,
             impact_plan=impact_plan,
             impact_type=impact_type,
-            status=validation_result['status']
+            status='needs_review'
         )
-
-        if 'score' in validation_result:
-            pledge.approvals = int(validation_result['score'] * 3)  # Simulate initial approvals based on score
-
         pledge.save()
 
         messages.success(request, 'Pledge submitted successfully! It will now be reviewed by the community.')
@@ -113,44 +112,73 @@ def submit_pledge(request, bottle_id):
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def validate_pledge(request, pledge_id):
-    """Validate another user's pledge"""
+    """Record one independent community review per account."""
     pledge = get_object_or_404(KarmaPledge, id=pledge_id)
+
+    if request.method == 'POST':
+        # Lock the pledge while checking and recording a vote so concurrent
+        # requests from the same account cannot count twice on databases that
+        # support SELECT ... FOR UPDATE.
+        with transaction.atomic():
+            pledge = get_object_or_404(
+                KarmaPledge.objects.select_for_update(),
+                id=pledge_id
+            )
+
+            if request.user == pledge.user:
+                messages.error(request, 'You cannot validate your own pledge.')
+                return redirect('core:dashboard')
+
+            if pledge.status in ('approved', 'rejected'):
+                messages.error(request, 'This pledge is already closed for review.')
+                return redirect('core:dashboard')
+
+            validations = list(pledge.validations or [])
+            already_voted = any(
+                isinstance(item, dict)
+                and item.get('validator_id') == request.user.id
+                for item in validations
+            )
+            if already_voted:
+                messages.error(request, 'You have already validated this pledge.')
+                return redirect('core:dashboard')
+
+            approval = request.POST.get('approval') == 'true'
+            comments = request.POST.get('comments', '')
+
+            validation_data = {
+                'validator_id': request.user.id,
+                'validator_username': request.user.username,
+                'approval': approval,
+                'comments': comments,
+                'timestamp': timezone.now().isoformat()
+            }
+            validations.append(validation_data)
+            pledge.validations = validations
+
+            if approval:
+                pledge.approvals += 1
+
+            if pledge.approvals >= 3:
+                pledge.status = 'approved'
+                messages.success(
+                    request,
+                    'Pledge approved by the community. No rebate has been processed; '
+                    'this prototype has no payment integration.'
+                )
+            else:
+                messages.success(request, 'Validation recorded successfully.')
+
+            # Rebate state is intentionally not changed here. A future payment
+            # integration must confirm an actual transaction before setting it.
+            pledge.save(update_fields=['validations', 'approvals', 'status'])
+
+        return redirect('core:dashboard')
 
     if request.user == pledge.user:
         messages.error(request, 'You cannot validate your own pledge.')
-        return redirect('core:dashboard')
-
-    if request.method == 'POST':
-        approval = request.POST.get('approval') == 'true'
-        comments = request.POST.get('comments', '')
-
-        # Record validation
-        validation_data = {
-            'validator_id': request.user.id,
-            'validator_username': request.user.username,
-            'approval': approval,
-            'comments': comments,
-            'timestamp': timezone.now().isoformat()
-        }
-
-        pledge.validations.append(validation_data)
-
-        if approval:
-            pledge.approvals += 1
-
-        # Check if pledge has enough approvals
-        if pledge.approvals >= 3:
-            pledge.status = 'approved'
-
-            # Process rebate (in a real implementation, this would call a payment API)
-            pledge.rebate_processed = True
-
-            messages.success(request, 'Pledge approved and rebate processed!')
-        else:
-            messages.success(request, 'Validation recorded successfully!')
-
-        pledge.save()
         return redirect('core:dashboard')
 
     context = {
