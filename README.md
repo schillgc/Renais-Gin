@@ -263,7 +263,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 For support and questions:
-- 📧 Email: support@renaisgin.com
+- 📧 Email: support@renais.com
 - 🐛 [Issue Tracker](https://github.com/schillgc/renais-gin/issues)
 - 💬 [Community Forum](https://community.renais.com)
 
