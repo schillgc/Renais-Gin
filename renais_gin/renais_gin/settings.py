@@ -24,9 +24,9 @@ def env_bool(name, default=False):
 
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-if not SECRET_KEY:
+if not SECRET_KEY or not SECRET_KEY.strip():
     raise ImproperlyConfigured(
-        "DJANGO_SECRET_KEY must be set. Generate a new, unique key for this deployment."
+        "DJANGO_SECRET_KEY must be set to a non-empty value."
     )
 
 DEBUG = env_bool("DJANGO_DEBUG", default=False)
@@ -37,6 +37,10 @@ ALLOWED_HOSTS = [
 ]
 if DEBUG and not ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
+elif not DEBUG and not ALLOWED_HOSTS:
+    raise ImproperlyConfigured(
+        "DJANGO_ALLOWED_HOSTS must list the production hostnames when DEBUG is false."
+    )
 
 
 INSTALLED_APPS = [
