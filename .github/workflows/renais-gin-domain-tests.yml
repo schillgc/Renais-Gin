@@ -6,7 +6,7 @@ on:
     paths:
       - "renais_gin/core/**"
       - "renais_gin/renais_gin/**"
-      - "renais_gin/test_settings.py"
+      - "renais_gin/renais_gin/test_settings.py"
       - ".github/workflows/renais-gin-domain-tests.yml"
       - "requirements.txt"
   pull_request:
