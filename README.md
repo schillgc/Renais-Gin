@@ -36,21 +36,28 @@ A transformative Django web application that turns premium gin consumption into 
 ### 🔧 Technical Excellence
 - **RESTful API**: Complete API for mobile apps and external services
 - **Modular Architecture**: Clean separation of concerns with dedicated AI services
-- **Production Ready**: Comprehensive settings for development, testing, and production
-- **Security First**: Built-in security best practices and configuration
+- **Environment-specific settings**: Separate development and production configuration (requires deployment review)
+- **Security controls**: Production startup now requires an explicit signing key and hostname allowlist
+
+## Integration status
+
+This branch is an integration draft, not a production release. AI, blockchain, community-validation, rebate, background-task, and external-provider capabilities must be independently tested before they are described as operational. Blockchain mock mode, sample data, and development-only flows must not be mistaken for live services.
+
+Do not deploy this branch or apply its migrations to an existing database until the dependency set, migration path, data preservation, reverse migrations, authentication, authorization, secrets, and end-to-end workflows have been reviewed and tested against disposable representative data. The default `master` branch remains the supported baseline.
 
 ## 🚀 Quick Start
 
-### Prerequisites
+The Django project is in `renais_gin/`; dependency declarations are in the repository root.
 
-- Python 3.8+
-- PostgreSQL (recommended) or SQLite
-- Redis (for celery tasks)
-- Node.js (for frontend assets)
-
-### Installation
-
-1. **Clone the repository**
 ```bash
-git clone https://github.com/schillgc/renais-gin.git
-cd renais-gin
+python -m venv .venv
+# Activate the environment, then:
+python -m pip install -r requirements.txt
+cd renais_gin
+python manage.py check
+```
+
+For a fresh local development database only, apply the committed migrations with `python manage.py migrate`, then create your own administrator interactively with `python manage.py createsuperuser`. Never use shared or hard-coded demo credentials.
+
+Production startup requires `DJANGO_SECRET_KEY` and an explicit comma-separated `DJANGO_ALLOWED_HOSTS` value. PostgreSQL Compose startup also requires `POSTGRES_PASSWORD` to be supplied through the environment. Do not commit secrets or production data.
+
