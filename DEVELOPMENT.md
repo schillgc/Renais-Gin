@@ -1,431 +1,129 @@
-# Development Guide for Renais Gin
+# Development guide
 
-## 🛠 Development Environment Setup
+This guide covers the Django application on the default branch. The supported local path uses SQLite and does not require PostgreSQL, Redis, Node.js, Celery, or external service credentials.
 
-### Prerequisites
-- Python 3.8+
-- PostgreSQL 12+ (recommended) or SQLite
-- Redis 6+ (for Celery tasks)
-- Node.js 16+ (for frontend tooling)
+## Prerequisites
+
+- Python 3.12
 - Git
+- PowerShell on Windows, or a POSIX-compatible shell on macOS/Linux
 
-### Step-by-Step Setup
+## Set up a local environment
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-organization/renais-gin.git
-   cd renais-gin
-   ```
-
-2. **Create and activate virtual environment**
-   ```bash
-   # Using venv
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   # or
-   .\venv\Scripts\activate  # Windows
-   
-   # Using conda
-   conda create -n renais-gin python=3.10
-   conda activate renais-gin
-   ```
-
-3. **Install Python dependencies**
-   ```bash
-   pip install -r requirements/development.txt
-   ```
-
-4. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your local configuration
-   ```
-
-5. **Set up database**
-   ```bash
-   # For PostgreSQL
-   createdb renais_gin_dev
-   
-   # For SQLite (default)
-   # No action needed
-   ```
-
-6. **Run migrations**
-   ```bash
-   python manage.py migrate
-   ```
-
-7. **Create superuser**
-   ```bash
-   python manage.py createsuperuser
-   ```
-
-8. **Load sample data**
-   ```bash
-   python manage.py add_test_bottles --count 20
-   python manage.py loaddata core/fixtures/initial_data.json
-   ```
-
-9. **Start development server**
-   ```bash
-   python manage.py runserver
-   ```
-
-10. **Start Celery worker (optional)**
-    ```bash
-    celery -A renais_gin worker -l info
-    ```
-
-## 🎨 Frontend Development
-
-### CSS and JavaScript Setup
-
-1. **Install Node.js dependencies**
-   ```bash
-   npm install
-   ```
-
-2. **Build CSS and JavaScript**
-   ```bash
-   # One-time build
-   npm run build
-   
-   # Watch for changes during development
-   npm run watch
-   ```
-
-3. **Using Sass (optional)**
-   ```bash
-   # If using Sass instead of plain CSS
-   sass --watch static/scss:static/css
-   ```
-
-### Template Structure
-
-```
-templates/
-├── base.html              # Base template
-├── includes/              # Reusable template components
-│   ├── header.html
-│   ├── footer.html
-│   └── navigation.html
-└── core/                  # App-specific templates
-    ├── dashboard.html
-    ├── register_bottle.html
-    ├── submit_pledge.html
-    └── *.html
-```
-
-## 🧪 Testing
-
-### Running Tests
+From the repository root:
 
 ```bash
-# Run all tests
-python manage.py test
-
-# Run specific test module
-python manage.py test core.tests.test_models
-
-# Run tests with coverage
-coverage run manage.py test
-coverage report
-coverage html  # Generate HTML report
-
-# Run tests in parallel
-python manage.py test --parallel
+git clone https://github.com/schillgc/Renais-Gin.git
+cd Renais-Gin/renais_gin
+python -m venv .venv
 ```
 
-### Writing Tests
-
-Follow the testing structure:
-
-```python
-# Example test structure
-class BottleModelTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        # Set up data for the whole TestCase
-        cls.user = User.objects.create_user(
-            username='testuser', 
-            password='testpass123'
-        )
-    
-    def test_bottle_creation(self):
-        # Test specific functionality
-        bottle = Bottle.objects.create(
-            bottle_id="TEST_001",
-            batch_id="BATCH_123",
-            production_date=date.today(),
-            registered_to=self.user
-        )
-        self.assertEqual(bottle.bottle_id, "TEST_001")
-```
-
-### Test Data Management
-
-Use factories for test data creation:
-
-```python
-# core/factories.py
-import factory
-from django.contrib.auth.models import User
-from core.models import Bottle, KarmaPledge
-
-class UserFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = User
-    
-    username = factory.Sequence(lambda n: f'user{n}')
-    email = factory.LazyAttribute(lambda obj: f'{obj.username}@example.com')
-
-class BottleFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Bottle
-    
-    bottle_id = factory.Sequence(lambda n: f'BOTTLE_{n:03d}')
-    batch_id = 'BATCH_001'
-    production_date = factory.Faker('date_this_year')
-```
-
-## 🔧 Development Tools
-
-### Recommended IDE Setup
-
-- **VS Code** with extensions:
-  - Python
-  - Django
-  - Prettier
-  - ESLint
-  - SQLite
-- **PyCharm** with Django support
-
-### Debugging
-
-1. **Using VS Code**
-   - Create a `.vscode/launch.json` file:
-   ```json
-   {
-     "version": "0.2.0",
-     "configurations": [
-       {
-         "name": "Django",
-         "type": "python",
-         "request": "launch",
-         "program": "${workspaceFolder}/manage.py",
-         "args": ["runserver"],
-         "django": true
-       }
-     ]
-   }
-   ```
-
-2. **Using Django Debug Toolbar**
-   - Already included in development requirements
-   - Access at http://localhost:8000/__debug__/
-
-3. **Print debugging**
-   ```python
-   import logging
-   logger = logging.getLogger(__name__)
-   
-   def my_view(request):
-       logger.debug("This is a debug message")
-       # Your view logic
-   ```
-
-### Code Quality Tools
+Activate the environment:
 
 ```bash
-# Run linters
-flake8 .  # PEP8 compliance
-black .   # Code formatting
-isort .   # Import sorting
+# macOS/Linux
+source .venv/bin/activate
 
-# Run security check
-bandit -r .
-
-# Check for outdated dependencies
-pip list --outdated
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
 ```
 
-## 📦 Dependency Management
-
-### Adding New Dependencies
-
-1. **Production dependencies**
-   ```bash
-   pip install <package>
-   pip freeze | grep <package> >> requirements/production.txt
-   ```
-
-2. **Development dependencies**
-   ```bash
-   pip install <package>
-   pip freeze | grep <package> >> requirements/development.txt
-   ```
-
-3. **Update all dependencies**
-   ```bash
-   pip install -r requirements/development.txt --upgrade
-   pip freeze > requirements/development.txt
-   ```
-
-## 🔄 Database Management
-
-### Migrations
+Install the minimal runtime used by the domain-test workflow:
 
 ```bash
-# Create migrations
+python -m pip install "Django==5.2.19" "Pillow==13.0.0" "qrcode==8.2"
+```
+
+The full repository `requirements.txt` includes additional packages for optional or inactive integrations, including large machine-learning libraries. They are not required for the core app or its domain tests. Install `reportlab==4.4.4` if you want to exercise PDF report generation. Install the pinned PostgreSQL driver from `requirements.txt` only when using PostgreSQL.
+
+## Configure Django
+
+Settings are read directly from environment variables; the project does not automatically load `.env` files. Generate a unique local key and configure the development host list in your current shell:
+
+```bash
+# macOS/Linux
+export DJANGO_SECRET_KEY="$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')"
+export DJANGO_DEBUG=true
+export DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,testserver
+```
+
+```powershell
+# Windows PowerShell
+$env:DJANGO_SECRET_KEY = python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+$env:DJANGO_DEBUG = "true"
+$env:DJANGO_ALLOWED_HOSTS = "localhost,127.0.0.1,testserver"
+```
+
+The app uses a local SQLite database by default. To use PostgreSQL, set `DJANGO_DB_ENGINE` to `django.db.backends.postgresql` and configure `DJANGO_DB_NAME`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`, `DJANGO_DB_HOST`, and `DJANGO_DB_PORT`. Never use production credentials in a development environment.
+
+## Run the application
+
+Run commands from `renais_gin/`:
+
+```bash
+python manage.py migrate
+python manage.py runserver
+```
+
+Create an administrator account when needed:
+
+```bash
+python manage.py createsuperuser
+```
+
+The dashboard and community features require authentication. Sign-up is available at `/signup/`, and Django's login page is at `/accounts/login/`.
+
+## Tests and checks
+
+Run the Django domain tests against isolated in-memory SQLite settings:
+
+```bash
+python manage.py test core --settings=renais_gin.test_settings --verbosity 2
+```
+
+Run Django checks and ensure model changes have migrations:
+
+```bash
+python manage.py check --settings=renais_gin.test_settings
+python manage.py makemigrations --check --dry-run --settings=renais_gin.test_settings
+python -m compileall -q core renais_gin
+```
+
+The settings and API source-contract tests use only the Python standard library. Run them from the repository root:
+
+```bash
+python -m unittest discover -s renais_gin -p "test_settings_security.py" -v
+python -m unittest discover -s renais_gin -p "test_api_security_contracts.py" -v
+```
+
+The GitHub Actions workflows run these test groups on changes to `master` and pull requests. The Django test settings use a disposable in-memory database; do not replace them with a real or shared database.
+
+## Test data and management commands
+
+- `python manage.py refresh_metrics` recalculates and stores the aggregate metrics snapshot. The public metrics endpoint only reads that snapshot.
+- `python manage.py add_test_bottles --count 10` creates synthetic bottle records and a fixed `test_user` account. **Use this command only with a disposable local database.** Do not run it against shared, staging, or production data.
+- `python manage.py initialize_ecosystem` also refreshes stored metrics; its legacy output mentions an AI ecosystem, but the command does not initialize or call an AI service.
+
+## Database changes
+
+Create and review migrations with:
+
+```bash
 python manage.py makemigrations
-
-# Check migration status
 python manage.py showmigrations
-
-# Apply migrations
-python manage.py migrate
-
-# Create data migration
-python manage.py makemigrations --empty core --name <migration_name>
-```
-
-### Database Fixtures
-
-```bash
-# Create fixtures from existing data
-python manage.py dumpdata core.Bottle --indent 2 > core/fixtures/bottles.json
-
-# Load fixtures
-python manage.py loaddata bottles
-```
-
-## 🚀 Deployment Preparation
-
-### Production Checks
-
-```bash
-# Run production checks
-python manage.py check --deploy
-
-# Collect static files
-python manage.py collectstatic
-
-# Create production database
-python manage.py migrate --settings=renais_gin.settings.production
-```
-
-### Environment Configuration
-
-Ensure these settings are configured in production:
-
-```python
-# settings/production.py
-DEBUG = False
-ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
-CSRF_TRUSTED_ORIGINS = ['https://yourdomain.com']
-
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
-}
-
-# Static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-```
-
-## 🤝 Contributing Workflow
-
-1. **Create a branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/issue-description
-   ```
-
-2. **Make your changes**
-   - Follow coding standards
-   - Write tests for new functionality
-   - Update documentation as needed
-
-3. **Test your changes**
-   ```bash
-   python manage.py test
-   flake8 .
-   ```
-
-4. **Commit your changes**
-   ```bash
-   git add .
-   git commit -m "Add feature: your feature description"
-   ```
-
-5. **Push and create a Pull Request**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-## 🐛 Common Issues and Solutions
-
-### Database Connection Issues
-```bash
-# If using PostgreSQL, ensure the service is running
-sudo service postgresql start
-
-# Reset database (development only)
-rm db.sqlite3
-python manage.py migrate
-python manage.py loaddata initial_data
-```
-
-### Migration Conflicts
-```bash
-# If migrations are conflicting
-python manage.py migrate --fake
-# Or reset migrations
-find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-find . -path "*/migrations/*.pyc" -delete
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-### Static Files Not Loading
-```bash
-# Collect static files
-python manage.py collectstatic
+Commit migration files with the model changes that require them. Do not delete or rewrite applied migrations to resolve conflicts. For risky schema changes, test forward migration and data preservation on a disposable copy before deployment.
 
-# Check STATIC_ROOT and STATIC_URL settings
-# Ensure DEBUG=False in production
-```
+## Contribution workflow
 
-## 📚 Additional Resources
+1. Open or link an issue describing the behavior to change.
+2. Make a focused change and add tests for new or corrected behavior.
+3. Update documentation when routes, setup, configuration, or product claims change.
+4. Run the checks above and inspect `git diff --check`.
+5. Open a pull request describing the motivation, behavior change, migration impact, and validation performed.
 
-- [Django Documentation](https://docs.djangoproject.com/)
-- [Django REST Framework Documentation](https://www.django-rest-framework.org/)
-- [Celery Documentation](https://docs.celeryq.dev/)
-- [Bootstrap Documentation](https://getbootstrap.com/)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+Use imperative, specific commit subjects (for example, `fix: reject duplicate pledge votes`). Do not commit credentials, local databases, uploaded files, generated coverage output, or machine-specific settings.
 
-## ❓ Getting Help
-
-If you encounter issues during development:
-
-1. Check this documentation
-2. Search existing GitHub issues
-3. Create a new issue with:
-   - Description of the problem
-   - Steps to reproduce
-   - Expected behavior
-   - Actual behavior
-   - Screenshots if applicable
-   - Your environment details
-
----
-
-*Happy coding! Remember, we're not just building an application - we're crafting a better world.* 🌍✨
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the project contribution checklist and [SECURITY.md](SECURITY.md) for vulnerability reporting and security boundaries.

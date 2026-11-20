@@ -1,270 +1,124 @@
-# Renais Gin: Craft Your Perfect World 🍸✨
+# Renais Gin
 
-[![Python Version](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
-[![Django Version](https://img.shields.io/badge/django-5.2.19-green)](https://www.djangoproject.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
+[![Django 5.2.19](https://img.shields.io/badge/django-5.2.19-green)](https://www.djangoproject.com/)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue)](https://www.gnu.org/licenses/agpl-3.0.html)
 
-A Django demonstration of bottle registration, sustainability pledges, community review, and aggregate movement metrics. The current default branch is a prototype: it does not execute blockchain transactions, call an AI model, or issue financial rebates. Product claims and impact records are not independently verified.
+Renais Gin is a Django prototype for registering bottle records, submitting sustainability pledges, reviewing pledges as a community, and viewing stored aggregate metrics. It is not a production verification or payments platform: submitted claims and product data are not independently verified, and the application does not call an AI model, write to a blockchain, or issue rebates.
 
-## 🌟 Vision
+## What the prototype does
 
-> "We don't sell gin. We sell a key. A key to a locked room in the human spirit where the desire to create, to connect, and to leave things better than we found it resides."
+- **Bottle records:** Stores a bottle ID, batch, production date, and supplied terroir data. A QR image can be generated from those fields; it does not prove a bottle's authenticity or sourcing.
+- **Pledges:** An authenticated user can submit one pledge per bottle registered to their account. A deterministic text heuristic may reject a submission; otherwise, it enters community review. The heuristic is not AI and does not approve claims.
+- **Community review:** Authenticated accounts other than the pledge author may vote once per pledge. Three positive votes approve it; three negative votes reject it. Account uniqueness is not real-world identity verification.
+- **Community circles:** Authenticated users can create, join, and leave circles. A circle leader cannot leave while they remain its leader.
+- **PDFs and reports:** Users can upload PDFs and download their own files. Impact reports are generated from application records; neither uploads nor reported impacts are independently verified.
+- **Movement metrics:** `GET /api/metrics/` returns the last stored snapshot without recalculating it. Run the `refresh_metrics` management command to update that snapshot.
 
-## ✨ Features
+The metrics are database aggregates, not independently audited impact results. In particular, the `total_rebates` field counts records marked as processed; it does not represent payments made by this prototype. The `impact_stories` field counts approved pledges, not verified stories.
 
-### 🍾 Digital-Physical Integration
-- **QR Code Authentication**: Each bottle features a unique QR code linking physical products to digital experiences
-- **Bottle records and QR codes**: Local Django records can generate a QR image for a bottle.
-- **Pledge workflow**: Submitted pledges enter a review queue; the application does not issue or transfer money.
+## Quick start
 
-### Pledge pre-screening prototype
-- **Text heuristic**: A small keyword/length heuristic rejects some submissions. It is not an AI model, fraud detector, or proof of authenticity.
-- **Community review**: A Django account can validate a given pledge once; three positive votes change its status to approved.
-- **Impact categorization**: A simple keyword classifier assigns an environmental, community, education, or other label.
+The application and its domain tests use Python 3.12. The default local database is SQLite.
 
-### 🌍 Sustainability Focus
-- **Terroir Tracking**: Detailed geographical and agricultural data for each batch
-- **Impact Metrics**: Real-time dashboard showing global community impact
-- **Data provenance**: Terroir/product fields are stored as supplied; the application does not independently verify sourcing or sustainability claims.
+1. Create and activate a virtual environment:
 
-### 👥 Community Ecosystem
-- **Renais Circles**: User-led local chapters for community action
-- **Global Network**: Connect with like-minded individuals worldwide
-- **Story Sharing**: Share and discover impact stories through the Karma Chronicle
+   ```bash
+   cd renais_gin
+   python -m venv .venv
+   # macOS/Linux
+   source .venv/bin/activate
+   # Windows PowerShell
+   .\.venv\Scripts\Activate.ps1
+   ```
 
-## 🚀 Quick Start
+2. Install the small runtime used by the app's domain-test workflow:
 
-### Prerequisites
+   ```bash
+   python -m pip install "Django==5.2.19" "Pillow==13.0.0" "qrcode==8.2"
+   ```
 
-- Python 3.12 (the maintained CI and domain-test baseline)
-- PostgreSQL (recommended) or SQLite
-- Redis (for celery tasks)
-- Node.js (for frontend assets)
+   PDF report generation also requires `reportlab` (`python -m pip install "reportlab==4.4.4"`). The full `requirements.txt` includes additional, resource-intensive packages for integrations that are not active features of this prototype.
 
-### Installation
+3. Configure local settings in the same shell:
 
-1. **Clone the repository**
-```bash
-git clone https://github.com/schillgc/renais-gin.git
-cd renais-gin
-```
+   ```bash
+   # macOS/Linux
+   export DJANGO_SECRET_KEY="$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')"
+   export DJANGO_DEBUG=true
+   export DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,testserver
+   ```
 
-2. **Set up virtual environment**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+   In Windows PowerShell:
 
-3. **Install dependencies**
-```bash
-pip install -r requirements.txt
-```
+   ```powershell
+   $env:DJANGO_SECRET_KEY = python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   $env:DJANGO_DEBUG = "true"
+   $env:DJANGO_ALLOWED_HOSTS = "localhost,127.0.0.1,testserver"
+   ```
 
-4. **Configure environment variables**
-```bash
-Set the required variables in your shell or deployment platform (see `.env.example`).
-# Do not commit real secret values.
-```
+4. Apply migrations and start the development server:
 
-5. **Run migrations**
-```bash
-python renais_gin/manage.py migrate
-```
+   ```bash
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
-6. **Create superuser**
-```bash
-python renais_gin/manage.py createsuperuser
-```
+   Open `http://127.0.0.1:8000/`. The dashboard requires an account; create one at `/signup/` or create an administrator with `python manage.py createsuperuser`.
 
-7. **Load sample data**
-```bash
-python renais_gin/manage.py add_test_bottles --count 10
-```
+The settings module reads environment variables directly; it does not load a `.env` file. Never use a development secret in production. PostgreSQL can be selected with the `DJANGO_DB_*` variables documented in [`.env.example`](.env.example); install the PostgreSQL driver from `requirements.txt` when using that database.
 
-8. **Run development server**
-```bash
-python renais_gin/manage.py runserver
-```
+## Main routes
 
-Visit `http://localhost:8000` to see the application in action!
+| Route | Access | Purpose |
+|---|---|---|
+| `/signup/` | Public | Create an account |
+| `/accounts/login/` | Public | Sign in |
+| `/` | Authenticated | View the user's bottles, pledges, and circles |
+| `/register-bottle/` | Authenticated | Register an existing, unregistered bottle record |
+| `/submit-pledge/<bottle_id>/` | Authenticated owner | Submit a pledge for a bottle registered to the account |
+| `/validate-pledge/<pledge_id>/` | Authenticated reviewer | Review another account's pledge |
+| `/circles/` | Authenticated | Browse community circles |
+| `/api/metrics/` | Public, GET only | Read the stored metrics snapshot |
 
-## 🏗️ Project Structure
+This is a Django server-rendered application, not a general REST API. There is no `/api/pledges/` endpoint.
 
-```
-renais-gin/
-├── core/                 # Main Django application
-│   ├── management/
-│   │   └── commands/    # Custom management commands
-│   ├── migrations/      # Database migrations
-│   ├── models.py        # Database models
-│   ├── services.py      # Business logic and services
-│   ├── views.py         # View controllers
-│   └── urls.py          # Application URL routes
-├── static/              # Static assets
-│   ├── css/
-│   │   └── renais.css   # Custom styles
-│   ├── js/
-│   │   └── renais.js    # Custom JavaScript
-│   └── images/          # Images and icons
-├── templates/           # Django templates
-│   ├── base.html        # Base template
-│   └── core/            # App-specific templates
-├── media/               # User-uploaded files
-└── renais_gin/          # Project settings
-    ├── settings/        # Environment-specific settings
-    ├── urls.py          # Root URL configuration
-    └── wsgi.py          # WSGI application
-```
+## Tests and checks
 
-## 🎯 Core Functionality
-
-### Bottle Registration Flow
-1. **Scan QR Code**: Users scan the QR code on their Renais Gin bottle
-2. **Terroir Verification**: System verifies bottle authenticity and displays terroir data
-3. **Pledge Creation**: The account holder submits a sustainability pledge for a registered bottle.
-4. **Community Review**: The heuristic pre-screen can reject a submission; otherwise it remains in review until three distinct authenticated accounts approve it.
-5. **Review Completion**: Approval changes the pledge status only. No rebate is paid and `rebate_processed` remains false because no payment integration exists.
-
-### Validation boundaries
-- The preliminary text screen is a deterministic keyword/length heuristic, not AI or machine learning.
-- A heuristic result cannot approve a pledge. Accepted submissions enter the `needs_review` state.
-- Community approval requires three positive votes from distinct Django accounts. The application does not establish that accounts represent unique real-world people or prevent coordinated voting across accounts.
-- Approval does not trigger a payment or external blockchain transaction.
-
-## 🔧 Configuration
-
-### Environment Variables
-
-```ini
-DJANGO_SECRET_KEY=<generate-a-new-random-secret>
-DJANGO_DEBUG=false
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-# Configure optional service credentials separately in your deployment environment.
-```
-
-### Settings Overview
-
-The default branch currently uses a single environment-driven settings module at `renais_gin/renais_gin/settings.py`. The test suite uses `renais_gin/renais_gin/test_settings.py` with an in-memory SQLite database. Do not assume the older modular settings layout described by previous project scaffolding is present.
-
-## 🧪 Testing
-
-Run the current domain tests from the `renais_gin/` directory with the isolated settings module:
+Run the domain suite from `renais_gin/` using the isolated, in-memory test settings:
 
 ```bash
 python manage.py test core --settings=renais_gin.test_settings --verbosity 2
+python manage.py check --settings=renais_gin.test_settings
+python manage.py makemigrations --check --dry-run --settings=renais_gin.test_settings
 ```
 
-The suite uses an in-memory database and tests pledge submission/review integrity, one-vote-per-account enforcement, non-payment on approval, and the read-only public metrics endpoint. CI installs only the small runtime needed for these tests.
-
-### Testing the pledge workflow
-
-The domain test suite creates a bottle and pledge in a disposable in-memory database. It confirms that even a high-scoring heuristic submission remains `needs_review`, that one account cannot vote twice, and that three distinct positive votes can approve a pledge without marking a rebate as paid. The test data is synthetic; no live provider or payment account is called.
-
-## 🚀 Deployment
-
-### Production Deployment
-
-1. **Set up production environment variables**
-2. **Configure static files**
-```bash
-python manage.py collectstatic
-```
-3. **Set up database**
-```bash
-python renais_gin/manage.py migrate
-```
-4. **Configure WSGI server** (Gunicorn recommended)
-5. **Set up reverse proxy** (Nginx recommended)
-6. **Configure SSL certificate**
-7. **Set up monitoring and logging**
-
-### Docker Deployment
+Run the standard-library security contract tests from the repository root:
 
 ```bash
-# Build and run with Docker Compose
-docker-compose up -d --build
-
-# Run specific services
-docker-compose up web worker redis
+python -m unittest discover -s renais_gin -p "test_settings_security.py" -v
+python -m unittest discover -s renais_gin -p "test_api_security_contracts.py" -v
 ```
 
-## 📊 API Endpoints
+See [DEVELOPMENT.md](DEVELOPMENT.md) for development workflow, database configuration, test-data cautions, and contribution guidance. See [SECURITY.md](SECURITY.md) for security boundaries and reporting guidance.
 
-The current routes are Django page/form endpoints plus one JSON metrics endpoint:
+## Project layout
 
-- `GET /api/metrics/` — return the last stored aggregate snapshot. This endpoint is read-only; it does not recalculate or write metrics.
-- `POST /register-bottle/` — authenticated bottle registration form.
-- `POST /submit-pledge/<bottle_id>/` — authenticated pledge form for a bottle registered to the current account.
-- `GET` / `POST /validate-pledge/<pledge_id>/` — authenticated community review form; each account can vote once per pledge.
-- `GET /download-pdf/<pdf_id>/` — authenticated download limited to the owning account.
-
-### Example API Usage
-
-```bash
-# Get movement metrics
-curl -X GET http://localhost:8000/api/metrics/
-
-# Create a new pledge
-curl -X POST http://localhost:8000/api/pledges/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "bottle_id": "TEST_001",
-    "pledge_text": "Your pledge here",
-    "impact_plan": "Your impact plan here"
-  }'
+```text
+.
+├── renais_gin/
+│   ├── core/                 # Models, forms, views, templates, migrations, commands
+│   ├── renais_gin/           # Django settings and URL configuration
+│   ├── manage.py
+│   ├── test_api_security_contracts.py
+│   └── test_settings_security.py
+├── .github/workflows/        # Domain and security contract checks
+├── docs/                     # Project review records
+├── DEVELOPMENT.md
+├── SECURITY.md
+└── requirements.txt
 ```
 
-## 🤝 Contributing
+## Status and license
 
-We welcome contributions to the Renais Gin project! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Setup
-
-For detailed development setup instructions, see [DEVELOPMENT.md](DEVELOPMENT.md).
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Emma & Alex Watson** for the vision and inspiration
-- **Chablis winegrowers** for their sustainable practices
-- **The Renais community** for their commitment to positive impact
-- **Open source contributors** who make projects like this possible
-
-## 📞 Support
-
-For support and questions:
-- 📧 Email: support@renais.com
-- 🐛 [Issue Tracker](https://github.com/schillgc/renais-gin/issues)
-- 💬 [Community Forum](https://community.renais.com)
-
-## 🌐 Connect
-
-- 🌍 [Official Website](https://www.renais.com)
-- 📷 [Instagram](https://instagram.com/renaisgin)
-- 🐦 [Twitter](https://twitter.com/renaisgin)
-- 📖 [Documentation](https://docs.renaisgin.com)
-
----
-
-**Craft Your Perfect World. One Bottle, One Pledge, One Community at a Time.** ✨
-
----
-
-*This project is not affiliated with Renais Gin or its parent company. It is an open-source demonstration of sustainable technology integration in the spirits industry.*
-
-## Current branch and integration status
-
-The default branch contains the current security-hardened settings baseline. A separate `full` branch holds a larger application expansion, but it is not approved for direct merging or deployment until its configuration, generated artifacts, dependencies, migrations, and application behavior pass the gates in [the integration review](docs/full-branch-integration-review.md). Do not use that branch as a production release.
-
-## Security
-
-See [SECURITY.md](SECURITY.md) for this repository's security, privacy, and responsible-use guidance.
+This repository is an independently maintained demonstration. It does not establish product authenticity, environmental outcomes, financial rewards, or endorsement by a brand or supplier. See [LICENSE](LICENSE) for the GNU Affero General Public License version 3.
