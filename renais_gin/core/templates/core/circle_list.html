@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Community Circles - Renais Gin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Community Circles</h1>
+    <a class="btn renais-btn-primary" href="{% url 'core:circle_create' %}">Create circle</a>
+</div>
+{% if circles %}
+<div class="row">
+    {% for circle in circles %}
+    <div class="col-md-6 mb-4">
+        <article class="renais-card card h-100">
+            <div class="card-body">
+                <h2 class="h5">{{ circle.name }}</h2>
+                <p class="text-muted mb-2">{{ circle.location }} · {{ circle.members.count }} members</p>
+                <p>{{ circle.description|truncatewords:30 }}</p>
+                <a class="btn renais-btn-outline" href="{% url 'core:circle_detail' circle.id %}">View circle</a>
+            </div>
+        </article>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">No circles exist yet. Create the first one for your community.</div>
+{% endif %}
+{% endblock %}

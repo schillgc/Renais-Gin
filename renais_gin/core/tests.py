@@ -1,10 +1,13 @@
 from datetime import date
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Bottle, KarmaPledge, MovementMetrics
+from .forms import PDFUploadForm
+from .models import Bottle, CommunityCircle, KarmaPledge, MovementMetrics, PledgeVote
 
 
 User = get_user_model()
@@ -109,3 +112,114 @@ class PledgeReviewIntegrityTests(TestCase):
 
         self.assertEqual(response.status_code, 405)
         self.assertEqual(MovementMetrics.objects.count(), 0)
+
+    def test_profile_is_created_for_new_users(self):
+        user = User.objects.create_user(
+            username="profile-user",
+            password="test-only-password",
+        )
+
+        self.assertTrue(hasattr(user, "userprofile"))
+
+    def test_empty_pledge_fields_are_rejected(self):
+        self.client.force_login(self.author)
+        response = self.client.post(
+            reverse("core:submit_pledge", args=[self.bottle.bottle_id]),
+            {"pledge_text": " ", "impact_plan": ""},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(KarmaPledge.objects.exists())
+
+    def test_same_user_cannot_submit_two_pledges_for_one_bottle(self):
+        KarmaPledge.objects.create(
+            submission_id="TEST-PLEDGE-ONE",
+            user=self.author,
+            bottle=self.bottle,
+            pledge_text="A test pledge",
+            impact_plan="A test plan",
+            status="needs_review",
+        )
+        self.client.force_login(self.author)
+        response = self.client.post(
+            reverse("core:submit_pledge", args=[self.bottle.bottle_id]),
+            {"pledge_text": "Another valid pledge", "impact_plan": "A second plan"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            KarmaPledge.objects.filter(user=self.author, bottle=self.bottle).count(),
+            1,
+        )
+
+    def test_database_constraint_prevents_duplicate_votes(self):
+        pledge = KarmaPledge.objects.create(
+            submission_id="TEST-PLEDGE-CONSTRAINT",
+            user=self.author,
+            bottle=self.bottle,
+            pledge_text="A test pledge",
+            impact_plan="A test plan",
+            status="needs_review",
+        )
+        PledgeVote.objects.create(
+            pledge=pledge,
+            voter=self.reviewers[0],
+            approval=True,
+        )
+
+        with self.assertRaises(IntegrityError):
+            PledgeVote.objects.create(
+                pledge=pledge,
+                voter=self.reviewers[0],
+                approval=True,
+            )
+
+    def test_bottle_registration_requires_a_valid_unregistered_bottle(self):
+        unregistered = Bottle.objects.create(
+            bottle_id="TEST-BOTTLE-REGISTER",
+            batch_id="TEST-BATCH",
+            production_date=date(2026, 1, 2),
+            terroir_data={"region": "test"},
+            registered=False,
+        )
+        self.client.force_login(self.author)
+        response = self.client.post(
+            reverse("core:register_bottle"),
+            {"bottle_id": unregistered.bottle_id},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        unregistered.refresh_from_db()
+        self.assertTrue(unregistered.registered)
+        self.assertEqual(unregistered.registered_to, self.author)
+
+    def test_community_circle_can_be_created(self):
+        self.client.force_login(self.author)
+        response = self.client.post(
+            reverse("core:circle_create"),
+            {
+                "name": "Test Circle",
+                "location": "Test City",
+                "description": "A test community.",
+            },
+        )
+
+        circle = CommunityCircle.objects.get(name="Test Circle")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(circle.leader, self.author)
+        self.assertTrue(circle.members.filter(id=self.author.id).exists())
+
+    def test_pdf_upload_requires_pdf_magic_bytes(self):
+        form = PDFUploadForm(
+            data={"title": "Test", "description": "Test"},
+            files={
+                "pdf_file": SimpleUploadedFile(
+                    "not-really.pdf",
+                    b"not a pdf",
+                    content_type="application/pdf",
+                )
+            },
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("valid PDF", form.errors["pdf_file"][0])

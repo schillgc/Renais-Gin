@@ -8,15 +8,15 @@
         <div class="renais-card card">
             <div class="card-header">
                 <h2 class="card-title text-center">Register Your Renais Bottle</h2>
-                <p class="text-center text-muted mb-0">After registration, you'll make a pledge to receive your $5 rebate</p>
+                <p class="text-center text-muted mb-0">After registration, submit a pledge for community review</p>
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="bottle_id" class="form-label">Bottle ID</label>
-                        <input type="text" class="form-control" id="bottle_id" name="bottle_id"
-                               placeholder="Enter the unique bottle ID" required>
+                        <label for="{{ form.bottle_id.id_for_label }}" class="form-label">Bottle ID</label>
+                        {{ form.bottle_id }}
+                        {% for error in form.bottle_id.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
                         <div class="form-text">Find the bottle ID on the bottom of your Renais bottle</div>
                     </div>
                     <div class="text-center">
@@ -42,8 +42,8 @@
                     </div>
                     <div class="col-md-4">
                         <div class="number-circle">3</div>
-                        <h5>Get Rebate</h5>
-                        <p>Receive $5 after community approval</p>
+                        <h5>Community Review</h5>
+                        <p>Three members may approve or close the pledge</p>
                     </div>
                 </div>
             </div>

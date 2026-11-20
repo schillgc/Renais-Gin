@@ -1,8 +1,8 @@
 import hashlib
 import json
 import os
-from datetime import datetime
 from io import BytesIO
+from uuid import uuid4
 
 import qrcode
 from django.contrib.auth.models import User
@@ -97,15 +97,47 @@ class KarmaPledge(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     rebate_processed = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'bottle'],
+                name='unique_pledge_per_user_bottle',
+            )
+        ]
+
     def save(self, *args, **kwargs):
         if not self.submission_id:
             self.submission_id = hashlib.sha256(
-                f"{self.user.id}{self.bottle.bottle_id}{datetime.now().isoformat()}".encode()
+                f"{self.user_id}:{self.bottle_id}:{uuid4()}".encode()
             ).hexdigest()[:16]
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Pledge {self.submission_id} by {self.user.username}"
+
+
+class PledgeVote(models.Model):
+    pledge = models.ForeignKey(
+        KarmaPledge,
+        on_delete=models.CASCADE,
+        related_name='votes',
+    )
+    voter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pledge_votes')
+    approval = models.BooleanField()
+    comments = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['pledge', 'voter'],
+                name='unique_vote_per_pledge_voter',
+            )
+        ]
+
+    def __str__(self):
+        vote = 'approved' if self.approval else 'rejected'
+        return f"{self.voter.username} {vote} {self.pledge.submission_id}"
 
 
 class CommunityCircle(models.Model):
