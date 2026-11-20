@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}{{ circle.name }} - Renais Gin{% endblock %}
+{% block content %}
+<article class="renais-card card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="h2">{{ circle.name }}</h1>
+                <p class="text-muted">{{ circle.location }} · Led by {{ circle.leader.username }}</p>
+            </div>
+            {% if is_member %}
+            {% if circle.leader != user %}
+            <form method="post" action="{% url 'core:circle_leave' circle.id %}">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger" type="submit">Leave circle</button>
+            </form>
+            {% endif %}
+            {% else %}
+            <form method="post" action="{% url 'core:circle_join' circle.id %}">
+                {% csrf_token %}
+                <button class="btn renais-btn-primary" type="submit">Join circle</button>
+            </form>
+            {% endif %}
+        </div>
+        <p class="lead">{{ circle.description|default:"No description provided." }}</p>
+        <h2 class="h5 mt-4">Members</h2>
+        <ul>
+            {% for member in circle.members.all %}
+            <li>{{ member.username }}{% if member == circle.leader %} (leader){% endif %}</li>
+            {% empty %}
+            <li>No members yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</article>
+{% endblock %}

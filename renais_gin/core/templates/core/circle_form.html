@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Create Community Circle - Renais Gin{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="renais-card card">
+            <div class="card-header"><h1 class="h3 mb-0">Create a Community Circle</h1></div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn renais-btn-primary">Create circle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

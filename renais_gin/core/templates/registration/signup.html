@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Create Account - Renais Gin{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="renais-card card">
+            <div class="card-header"><h1 class="h3 mb-0 text-center">Create an account</h1></div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        <input type="{% if 'password' in field.name %}password{% else %}text{% endif %}"
+                               name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+                               class="form-control" value="{{ field.value|default:'' }}" {% if field.field.required %}required{% endif %}>
+                        {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+                        {% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button class="btn renais-btn-primary w-100" type="submit">Create account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

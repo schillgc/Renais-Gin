@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Sign In - Renais Gin{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="renais-card card">
+            <div class="card-header"><h1 class="h3 mb-0 text-center">Sign in</h1></div>
+            <div class="card-body">
+                {% if form.errors %}<div class="alert alert-danger">The username or password is incorrect.</div>{% endif %}
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label" for="id_username">Username</label>
+                        <input class="form-control" type="text" name="username" id="id_username" autocomplete="username" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="id_password">Password</label>
+                        <input class="form-control" type="password" name="password" id="id_password" autocomplete="current-password" required>
+                    </div>
+                    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+                    <button class="btn renais-btn-primary w-100" type="submit">Sign in</button>
+                </form>
+                <p class="text-center mt-3 mb-0">New here? <a href="{% url 'core:signup' %}">Create an account</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

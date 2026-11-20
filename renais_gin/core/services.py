@@ -1,5 +1,10 @@
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import timedelta
+
+from django.contrib.auth.models import User
+from django.db.models import Count
+from django.utils import timezone
+
 from .models import KarmaPledge, MovementMetrics, UserProfile
 
 
@@ -31,10 +36,7 @@ class KarmaValidationService:
 
         if sentiment_score < 0.3:
             return {"status": "rejected", "reason": "Pledge lacks authenticity"}
-        elif sentiment_score < 0.6:
-            return {"status": "needs_review", "score": sentiment_score}
-        else:
-            return {"status": "approved", "score": sentiment_score}
+        return {"status": "needs_review", "score": sentiment_score}
 
     @staticmethod
     def classify_impact_type(impact_plan):
@@ -56,7 +58,7 @@ class StoryCurationService:
     @staticmethod
     def generate_impact_report(timeframe_days=30):
         """Generate impact report from stories"""
-        time_threshold = datetime.now() - timedelta(days=timeframe_days)
+        time_threshold = timezone.now() - timedelta(days=timeframe_days)
         recent_pledges = KarmaPledge.objects.filter(timestamp__gte=time_threshold)
 
         impact_categories = defaultdict(int)
@@ -72,14 +74,9 @@ class CommunityGrowthService:
     @staticmethod
     def identify_potential_leaders(min_engagement=10.0):
         """Identify community members with leadership potential"""
-        # This would be implemented with actual engagement metrics
-        # For now, return users who have submitted multiple pledges
-        from django.db.models import Count
-        from django.contrib.auth.models import User
-
         potential_leaders = User.objects.annotate(
             pledge_count=Count('karmapledge')
-        ).filter(pledge_count__gte=3).exclude(
+        ).filter(pledge_count__gte=min_engagement).exclude(
             led_circles__isnull=False
         )
 
@@ -92,20 +89,16 @@ class PersonalizationService:
     @staticmethod
     def generate_recommendations(user):
         """Generate personalized recommendations for user"""
-        try:
-            profile = user.userprofile
-        except UserProfile.DoesNotExist:
+        profile = getattr(user, 'userprofile', None)
+        if profile is None:
             return []
 
         recommendations = []
 
         # Recommend causes based on preferences
-        if hasattr(profile, 'preferences') and 'preferred_causes' in profile.preferences:
-            top_causes = sorted(
-                profile.preferences['preferred_causes'].items(),
-                key=lambda x: x[1],
-                reverse=True
-            )[:3]
+        preferred_causes = profile.preferences.get('preferred_causes', {})
+        if isinstance(preferred_causes, dict):
+            top_causes = sorted(preferred_causes.items(), key=lambda item: item[1], reverse=True)[:3]
 
             for cause, score in top_causes:
                 recommendations.append({
@@ -126,6 +119,7 @@ class MovementMetricsService:
         metrics, created = MovementMetrics.objects.get_or_create(pk=1)
 
         metrics.total_pledges = KarmaPledge.objects.count()
+        metrics.total_rebates = KarmaPledge.objects.filter(rebate_processed=True).count()
         metrics.community_size = UserProfile.objects.count()
         metrics.impact_stories = KarmaPledge.objects.filter(status='approved').count()
 

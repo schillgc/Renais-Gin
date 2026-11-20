@@ -20,7 +20,7 @@
             </div>
             <div class="col-md-4">
                 <div class="number-circle">3</div>
-                <h5>Get Rebate</h5>
+                <h5>Community Review</h5>
             </div>
         </div>
     </div>
@@ -38,25 +38,25 @@
                     <h5>How It Works</h5>
                     <ol>
                         <li>Submit your pledge to make a positive impact</li>
-                        <li>Our AI validates your pledge's authenticity</li>
+                        <li>A free deterministic text pre-screen checks basic pledge quality</li>
                         <li>The community reviews and approves your pledge</li>
-                        <li>Receive your $5 rebate after approval</li>
+                        <li>Approval is a community status, not a payment or verified impact claim</li>
                     </ol>
                 </div>
 
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="pledge_text" class="form-label">Your Pledge</label>
-                        <textarea class="form-control" id="pledge_text" name="pledge_text" rows="4"
-                                  placeholder="I pledge to use this rebate to..." required></textarea>
-                        <div class="form-text">Describe how you'll use the $5 rebate to better your corner of the world</div>
+                        <label for="{{ form.pledge_text.id_for_label }}" class="form-label">Your Pledge</label>
+                        {{ form.pledge_text }}
+                        {% for error in form.pledge_text.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+                        <div class="form-text">Describe a specific, measurable commitment to your community</div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="impact_plan" class="form-label">Impact Plan</label>
-                        <textarea class="form-control" id="impact_plan" name="impact_plan" rows="3"
-                                  placeholder="I'll accomplish this by..." required></textarea>
+                        <label for="{{ form.impact_plan.id_for_label }}" class="form-label">Impact Plan</label>
+                        {{ form.impact_plan }}
+                        {% for error in form.impact_plan.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
                         <div class="form-text">Explain how you'll implement your pledge</div>
                     </div>
 

@@ -10,6 +10,7 @@ scikit-learn==1.7.1
 sentence-transformers==5.1.0
 celery==5.5.3
 redis==6.4.0
+reportlab==4.4.4
 gunicorn==23.0.0
 whitenoise==6.9.0
 psycopg2-binary==2.9.10

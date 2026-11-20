@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import UserProfile, Bottle, KarmaPledge, CommunityCircle, MovementMetrics, GeneratedReport, UserPDFDocument
+from .models import (
+    Bottle,
+    CommunityCircle,
+    GeneratedReport,
+    KarmaPledge,
+    MovementMetrics,
+    PledgeVote,
+    UserPDFDocument,
+    UserProfile,
+)
 
 
 @admin.register(UserProfile)
@@ -39,6 +48,13 @@ class KarmaPledgeAdmin(admin.ModelAdmin):
     list_filter = ('status', 'impact_type', 'timestamp')
     search_fields = ('user__username', 'bottle__bottle_id', 'pledge_text')
     readonly_fields = ('submission_id', 'timestamp')
+
+
+@admin.register(PledgeVote)
+class PledgeVoteAdmin(admin.ModelAdmin):
+    list_display = ('pledge', 'voter', 'approval', 'timestamp')
+    list_filter = ('approval', 'timestamp')
+    search_fields = ('pledge__submission_id', 'voter__username', 'comments')
 
 
 @admin.register(CommunityCircle)
