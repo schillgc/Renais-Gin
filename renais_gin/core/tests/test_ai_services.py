@@ -120,8 +120,8 @@ class AIServicesTestCase(TestCase):
         """The AI core should validate pledges and produce movement reports."""
         pledge_text = "I pledge to organize a community recycling drive."
         impact_plan = (
-            "I will work with local businesses and neighborhood volunteers "
-            "to establish recycling collection points."
+            "I will coordinate sustainable tree planting and recycling to "
+            "improve biodiversity and protect wildlife."
         )
 
         validation_result = self.ai_core.process_pledge_submission(
