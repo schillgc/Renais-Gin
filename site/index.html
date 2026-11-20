@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#18352f">
+  <meta name="description" content="Explore a transparent, browser-only demonstration of bottle registration and community pledge review.">
+  <meta property="og:title" content="Renais Gin | A bottle-to-pledge prototype">
+  <meta property="og:description" content="Try a small, transparent demo. No account, backend, or data persistence.">
+  <meta property="og:type" content="website">
+  <title>Renais Gin | A bottle-to-pledge prototype</title>
+  <link rel="stylesheet" href="./assets/site.css">
+  <script src="./assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="notice-bar">
+    <span class="notice-dot" aria-hidden="true"></span>
+    <p>Browser-only demo <span aria-hidden="true">/</span> No account <span aria-hidden="true">/</span> Resets on refresh</p>
+  </div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="#top" aria-label="Renais Gin home">
+        <span class="wordmark-mark" aria-hidden="true">R</span>
+        <span>RENAIS <small>GIN / PROTOTYPE</small></span>
+      </a>
+      <nav class="primary-nav" aria-label="Main navigation">
+        <a href="#how-it-works">The idea</a>
+        <a href="#demo">Try the demo</a>
+        <a href="#boundaries">What is real</a>
+      </nav>
+      <a class="nav-cta" href="https://github.com/schillgc/Renais-Gin">View source <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero section-shell" id="top">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span> An independent browser demo</p>
+          <h1>A bottle can start a <em>conversation.</em></h1>
+          <p class="hero-intro">Explore a simple path from a bottle record to a personal pledge and a community review. This page is an interactive prototype, not a live service.</p>
+          <div class="hero-actions">
+            <a class="button button-dark" href="#demo">Explore the demo <span aria-hidden="true">↓</span></a>
+            <a class="text-link" href="#how-it-works">See how it works</a>
+          </div>
+          <ul class="promise-list" aria-label="Demo properties">
+            <li><span aria-hidden="true">01</span> Nothing is submitted</li>
+            <li><span aria-hidden="true">02</span> No external APIs</li>
+            <li><span aria-hidden="true">03</span> No saved data</li>
+          </ul>
+        </div>
+
+        <div class="hero-art" aria-label="Illustration of a sample bottle record" role="img">
+          <div class="art-orbit orbit-one"></div>
+          <div class="art-orbit orbit-two"></div>
+          <div class="art-caption caption-top">FIELD NOTE <span>NO. 001</span></div>
+          <div class="bottle-shadow"></div>
+          <svg class="bottle-illustration" viewBox="0 0 270 430" aria-hidden="true">
+            <defs>
+              <linearGradient id="glass" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#476b55"/>
+                <stop offset=".48" stop-color="#203f34"/>
+                <stop offset="1" stop-color="#112c26"/>
+              </linearGradient>
+              <linearGradient id="foil" x1="0" x2="1">
+                <stop offset="0" stop-color="#b47e45"/>
+                <stop offset=".5" stop-color="#e0b976"/>
+                <stop offset="1" stop-color="#9d6835"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="136" cy="407" rx="76" ry="12" fill="#152d28" opacity=".12"/>
+            <path d="M111 23h50v55c0 20 16 32 31 47 17 17 26 38 26 65v161c0 27-16 43-43 43H77c-27 0-43-16-43-43V190c0-27 9-48 26-65 15-15 31-27 31-47V23z" fill="url(#glass)"/>
+            <path d="M111 23h50v55c0 20 16 32 31 47H80c15-15 31-27 31-47z" fill="url(#foil)"/>
+            <path d="M111 23h50v55c0 20 16 32 31 47H80c15-15 31-27 31-47z" fill="none" stroke="#f0d7a4" stroke-opacity=".45" stroke-width="2"/>
+            <path d="M57 172c0-10 3-19 8-27h142c5 8 8 17 8 27v33H57z" fill="#2f503e" opacity=".78"/>
+            <path d="M62 197h148v105H62z" fill="#e9dfc8"/>
+            <path d="M73 210h126v2H73z" fill="#b48855" opacity=".8"/>
+            <path d="M73 287h126v2H73z" fill="#b48855" opacity=".8"/>
+            <text x="136" y="243" text-anchor="middle" fill="#18352f" font-family="Georgia,serif" font-size="21" letter-spacing="3">RENAIS</text>
+            <text x="136" y="262" text-anchor="middle" fill="#626657" font-family="Arial,sans-serif" font-size="8" letter-spacing="2">A SAMPLE RECORD</text>
+            <path d="M126 270h20" stroke="#b48855" stroke-width="1.5"/>
+            <path d="M74 160c0 0-16 25-16 51v136c0 24 13 35 29 38" fill="none" stroke="#aac1a5" stroke-opacity=".32" stroke-width="7" stroke-linecap="round"/>
+            <path d="M168 151c15 11 25 28 25 49v143" fill="none" stroke="#a9c5a5" stroke-opacity=".12" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <div class="art-caption caption-bottom">A RECORD, NOT PROOF <span>DEMO OBJECT</span></div>
+          <div class="art-stamp"><span>R</span><small>EST.<br>DEMO</small></div>
+        </div>
+      </div>
+      <div class="hero-bottom-rule" aria-hidden="true"></div>
+    </section>
+
+    <section class="session-bar" aria-labelledby="session-title">
+      <div class="container session-inner">
+        <div>
+          <p class="eyebrow eyebrow-small" id="session-title">Your current browser session</p>
+          <p class="session-note">These counters reflect only the actions you take below. They are not community or impact statistics.</p>
+        </div>
+        <div class="session-metrics" aria-live="polite" aria-atomic="true">
+          <div class="session-metric"><strong id="metric-bottles">0</strong><span>demo bottles</span></div>
+          <div class="session-metric"><strong id="metric-pledges">0</strong><span>demo pledges</span></div>
+          <div class="session-metric"><strong id="metric-votes">0</strong><span>simulated votes</span></div>
+          <div class="session-state"><span class="live-dot" aria-hidden="true"></span> IN MEMORY</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell how-section" id="how-it-works">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> The idea</p>
+            <h2>Three steps.<br><em>No magic claims.</em></h2>
+          </div>
+          <p class="section-aside">The prototype models a workflow. It cannot prove a bottle's origin, verify a pledge's impact, or identify unique people behind browser clicks.</p>
+        </div>
+        <div class="steps-grid">
+          <article class="step-card">
+            <span class="step-number">01</span>
+            <div class="step-icon icon-bottle" aria-hidden="true"><span></span></div>
+            <h3>Register a record</h3>
+            <p>Associate a sample bottle ID with this page's temporary demo state.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">02</span>
+            <div class="step-icon icon-note" aria-hidden="true"><span></span><span></span><span></span></div>
+            <h3>Write a pledge</h3>
+            <p>Describe a personal action and a plan. The demo does not validate real-world outcomes.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">03</span>
+            <div class="step-icon icon-review" aria-hidden="true"><span></span><span></span><span></span></div>
+            <h3>Simulate review</h3>
+            <p>Try virtual votes to see how a three-vote threshold changes the demo status.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section section-shell" id="demo">
+      <div class="container">
+        <div class="section-heading demo-heading">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> A hands-on prototype</p>
+            <h2>Try the flow.</h2>
+          </div>
+          <div class="demo-label"><span class="demo-label-dot" aria-hidden="true"></span> LOCAL TO THIS PAGE</div>
+        </div>
+        <div class="demo-notice" role="note">
+          <span class="notice-icon" aria-hidden="true">i</span>
+          <p><strong>Nothing is sent or saved.</strong> Bottle IDs are samples, reviewer identities are simulated, and refreshing this page clears the activity.</p>
+          <button class="reset-button" id="reset-demo" type="button">Reset demo</button>
+        </div>
+
+        <div class="demo-grid">
+          <section class="demo-card registration-card" aria-labelledby="register-title">
+            <div class="card-topline"><span>01 / REGISTER</span><span class="card-mark" aria-hidden="true">R</span></div>
+            <h3 id="register-title">Choose a sample bottle</h3>
+            <p class="card-description">These IDs exist only in the JavaScript running in this browser tab.</p>
+            <form id="bottle-form">
+              <fieldset class="demo-fields" id="bottle-demo-fields" disabled>
+                <legend class="visually-hidden">Register a sample bottle</legend>
+                <label for="bottle-id">Available demo ID</label>
+                <div class="input-with-button">
+                  <select id="bottle-id" name="bottleId" required>
+                    <option value="">Select a sample bottle</option>
+                    <option value="RG-DEMO-001">RG-DEMO-001 / Garden batch</option>
+                    <option value="RG-DEMO-002">RG-DEMO-002 / Orchard batch</option>
+                    <option value="RG-DEMO-003">RG-DEMO-003 / Meadow batch</option>
+                  </select>
+                  <button class="button button-dark button-compact" type="submit">Register</button>
+                </div>
+                <p class="field-hint">The demo does not scan QR codes or check product authenticity.</p>
+              </fieldset>
+            </form>
+            <div class="registered-list-wrap">
+              <h4>Your demo bottles <span id="bottle-count-label">0</span></h4>
+              <ul class="registered-list" id="registered-bottles">
+                <li class="empty-row">No sample bottles registered yet.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="demo-card pledge-card" aria-labelledby="pledge-title">
+            <div class="card-topline"><span>02 / PLEDGE</span><span class="card-mark" aria-hidden="true">P</span></div>
+            <h3 id="pledge-title">Make a small promise</h3>
+            <p class="card-description">Write a concrete intention and an action plan. Text stays in this tab's memory.</p>
+            <div class="locked-state" id="pledge-locked">
+              <span class="lock-symbol" aria-hidden="true">02</span>
+              <p>Register a sample bottle first to unlock the demo pledge form.</p>
+            </div>
+            <form id="pledge-form" hidden>
+              <fieldset class="demo-fields" id="pledge-demo-fields" disabled>
+                <legend class="visually-hidden">Create a sample pledge</legend>
+                <label for="pledge-bottle">Attach to a demo bottle</label>
+                <select id="pledge-bottle" name="bottleId" required></select>
+
+                <label for="pledge-text">Your pledge</label>
+                <textarea id="pledge-text" name="pledgeText" rows="3" minlength="20" maxlength="500" required placeholder="What is one helpful action you intend to take?"></textarea>
+                <div class="character-row"><span>Keep it specific and achievable.</span><span id="pledge-length">0 / 500</span></div>
+
+                <label for="impact-plan">Your action plan</label>
+                <textarea id="impact-plan" name="impactPlan" rows="3" minlength="20" maxlength="800" required placeholder="What will you do, and how will you follow through?"></textarea>
+
+                <label for="impact-type">Focus area</label>
+                <select id="impact-type" name="impactType">
+                  <option value="community">Community</option>
+                  <option value="environmental">Environment</option>
+                  <option value="education">Education</option>
+                  <option value="other">Other</option>
+                </select>
+                <button class="button button-copper submit-pledge" type="submit">Add demo pledge <span aria-hidden="true">→</span></button>
+              </fieldset>
+            </form>
+          </section>
+        </div>
+
+        <section class="activity-section" aria-labelledby="activity-title">
+          <div class="activity-heading">
+            <div>
+              <div class="card-topline"><span>03 / REVIEW</span><span class="card-mark" aria-hidden="true">V</span></div>
+              <h3 id="activity-title">Your demo activity</h3>
+            </div>
+            <p>Votes are simulated buttons, not community participation.</p>
+          </div>
+          <div class="pledge-list" id="pledge-list" aria-live="polite">
+            <div class="empty-activity">
+              <span class="empty-symbol" aria-hidden="true">—</span>
+              <p>Your demo pledges will appear here.</p>
+            </div>
+          </div>
+        </section>
+        <p class="demo-status" id="demo-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="boundaries-section section-shell" id="boundaries">
+      <div class="container boundaries-grid">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-line"></span> Clear boundaries</p>
+          <h2>What this page<br><em>does not do.</em></h2>
+        </div>
+        <div class="boundary-list">
+          <article>
+            <span class="boundary-no">01</span>
+            <div><h3>No Django backend</h3><p>GitHub Pages serves static files. Accounts, uploads, databases, and server-side actions are not available here.</p></div>
+          </article>
+          <article>
+            <span class="boundary-no">02</span>
+            <div><h3>No persistence or tracking</h3><p>Demo activity stays in page memory and disappears when you refresh or close the tab. This site makes no analytics or API calls.</p></div>
+          </article>
+          <article>
+            <span class="boundary-no">03</span>
+            <div><h3>No proof of impact</h3><p>Sample records and simulated votes do not verify bottle provenance, real people, environmental outcomes, payments, AI, or blockchain activity.</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-main">
+      <a class="wordmark footer-wordmark" href="#top">
+        <span class="wordmark-mark" aria-hidden="true">R</span>
+        <span>RENAIS <small>INDEPENDENT PROTOTYPE</small></span>
+      </a>
+      <p>A small demo of a workflow, not a claim about the world.</p>
+      <div class="footer-links">
+        <a href="https://github.com/schillgc/Renais-Gin">Source code <span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/schillgc/Renais-Gin/blob/master/SECURITY.md">Security <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <p class="footer-disclaimer">Independent demonstration; not affiliated with or endorsed by any brand or supplier.</p>
+    <div class="container footer-bottom">
+      <span>Renais Gin / Browser-only prototype</span>
+      <a href="#top">Back to top ↑</a>
+    </div>
+  </footer>
+
+  <noscript>
+    <div class="noscript-note">This interactive demo needs JavaScript enabled; its forms stay disabled otherwise. It does not send data to a server.</div>
+  </noscript>
+</body>
+</html>

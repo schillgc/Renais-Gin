@@ -6,6 +6,12 @@
 
 Renais Gin is a Django prototype for registering bottle records, submitting sustainability pledges, reviewing pledges as a community, and viewing stored aggregate metrics. It is not a production verification or payments platform: submitted claims and product data are not independently verified, and the application does not call an AI model, write to a blockchain, or issue rebates.
 
+## GitHub Pages demo
+
+[Try the interactive browser demo](https://schillgc.github.io/Renais-Gin/). It demonstrates the bottle and pledge flow using static HTML, CSS, and JavaScript. It does not connect to Django, send form data to a server, create real accounts or reviews, or persist data; refreshing the page resets the demo.
+
+The Django application still requires a Python host and database. GitHub Pages cannot run Django. See [Quick start](#quick-start) to run the application locally.
+
 ## What the prototype does
 
 - **Bottle records:** Stores a bottle ID, batch, production date, and supplied terroir data. A QR image can be generated from those fields; it does not prove a bottle's authenticity or sourcing.
