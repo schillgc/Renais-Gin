@@ -13,9 +13,4 @@ class Command(BaseCommand):
         # Create default movement metrics
         MovementMetricsService.update_metrics()
 
-        # Create admin user if it doesn't exist
-        if not User.objects.filter(username='admin').exists():
-            User.objects.create_superuser('admin', 'admin@renaisgin.com', 'adminpassword')
-            self.stdout.write('Created admin user')
-
         self.stdout.write('Ecosystem initialized. Ready to craft a better world.')

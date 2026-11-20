@@ -25,10 +25,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg renais-navbar">
         <div class="container">
-            <a class="navbar-brand renais-brand" href="{% url 'core:dashboard' %}">
-                <img src="{% static 'images/renais-logo.jpg' %}" alt="Renais Logo" height="40" class="d-inline-block align-text-top">
-                RENAIS
-            </a>
+            <a class="navbar-brand renais-brand" href="{% url 'core:dashboard' %}">RENAIS</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -40,18 +37,24 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'core:register_bottle' %}">Register Bottle</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:circle_list' %}">Circles</a>
+                    </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             {{ user.username }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'admin:logout' %}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin:login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:signup' %}">Create account</a>
                     </li>
                     {% endif %}
                 </ul>

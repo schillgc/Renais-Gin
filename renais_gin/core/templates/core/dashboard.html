@@ -161,7 +161,7 @@
                         </p>
                         {% if pledge.status == 'approved' %}
                         <div class="alert alert-success">
-                            <small>Your rebate has been processed! Thank you for your commitment.</small>
+                            <small>Community approved. No payment or verified external outcome is implied.</small>
                         </div>
                         {% endif %}
                     </div>
@@ -184,7 +184,7 @@
         <h2 class="mb-4">Complete Your Registration</h2>
         <div class="alert alert-info">
             <h5>You have registered bottles without pledges</h5>
-            <p>Complete your registration by making a pledge for these bottles to receive your $5 rebate.</p>
+            <p>Complete your registration by making a pledge for community review.</p>
         </div>
         <div class="row">
             {% for bottle in bottles_without_pledges %}

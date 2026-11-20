@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Pledge - Renais Gin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="renais-card card">
+            <div class="card-header">
+                <h1 class="h3 mb-0">Community Pledge Review</h1>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-1">Submitted by {{ pledge.user.username }}</p>
+                <h2 class="h5">Pledge</h2>
+                <p>{{ pledge.pledge_text|linebreaksbr }}</p>
+                <h2 class="h5">Impact plan</h2>
+                <p>{{ pledge.impact_plan|linebreaksbr }}</p>
+
+                {% if pledge.status == 'approved' or pledge.status == 'rejected' %}
+                <div class="alert alert-info">
+                    This pledge is closed: <strong>{{ pledge.status|title }}</strong>.
+                </div>
+                {% elif user == pledge.user %}
+                <div class="alert alert-warning">You cannot review your own pledge.</div>
+                {% else %}
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="approval" class="form-label">Decision</label>
+                        <select class="form-control" id="approval" name="approval" required>
+                            <option value="true">Approve</option>
+                            <option value="false">Reject</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comments" class="form-label">Review note</label>
+                        <textarea class="form-control" id="comments" name="comments" maxlength="2000" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn renais-btn-primary">Submit review</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

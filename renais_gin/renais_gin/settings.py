@@ -83,12 +83,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'renais_gin.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.environ.get('DJANGO_DB_ENGINE'):
+    DATABASES = {
+        'default': {
+            'ENGINE': os.environ['DJANGO_DB_ENGINE'],
+            'NAME': os.environ.get('DJANGO_DB_NAME', ''),
+            'USER': os.environ.get('DJANGO_DB_USER', ''),
+            'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', ''),
+            'HOST': os.environ.get('DJANGO_DB_HOST', ''),
+            'PORT': os.environ.get('DJANGO_DB_PORT', ''),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -111,17 +123,29 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+static_dir = BASE_DIR / 'static'
+STATICFILES_DIRS = [static_dir] if static_dir.is_dir() else []
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_URL = '/admin/login/'
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 PDF_UPLOAD_PATH = 'pdfs/user_uploads/'
 PDF_REPORT_PATH = 'pdfs/generated_reports/'
