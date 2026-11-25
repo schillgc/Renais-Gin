@@ -131,6 +131,12 @@ class SettingsSecurityContractTests(TestCase):
             "DJANGO_ALLOWED_HOSTS": "localhost",
         })
         self.assertEqual(default.DATABASES["default"]["ENGINE"], "django.db.backends.sqlite3")
+        blank_backend = self.load_settings({
+            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_ALLOWED_HOSTS": "localhost",
+            "DJANGO_DB_ENGINE": "",
+        })
+        self.assertEqual(blank_backend.DATABASES["default"]["ENGINE"], "django.db.backends.sqlite3")
 
         with self.assertRaisesRegex(ImproperlyConfigured, "PostgreSQL requires"):
             self.load_settings({
