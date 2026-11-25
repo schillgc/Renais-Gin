@@ -83,24 +83,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'renais_gin.wsgi.application'
 
-if os.environ.get('DJANGO_DB_ENGINE'):
+DB_ENGINE = os.environ.get("DJANGO_DB_ENGINE", "sqlite").strip().lower() or "sqlite"
+if DB_ENGINE in {"postgres", "postgresql"}:
+    required_db_values = ("DJANGO_DB_NAME", "DJANGO_DB_USER", "DJANGO_DB_PASSWORD", "DJANGO_DB_HOST")
+    missing_db_values = [name for name in required_db_values if not os.environ.get(name)]
+    if missing_db_values:
+        raise ImproperlyConfigured(
+            "PostgreSQL requires these environment variables: " + ", ".join(missing_db_values)
+        )
     DATABASES = {
-        'default': {
-            'ENGINE': os.environ['DJANGO_DB_ENGINE'],
-            'NAME': os.environ.get('DJANGO_DB_NAME', ''),
-            'USER': os.environ.get('DJANGO_DB_USER', ''),
-            'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', ''),
-            'HOST': os.environ.get('DJANGO_DB_HOST', ''),
-            'PORT': os.environ.get('DJANGO_DB_PORT', ''),
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["DJANGO_DB_NAME"],
+            "USER": os.environ["DJANGO_DB_USER"],
+            "PASSWORD": os.environ["DJANGO_DB_PASSWORD"],
+            "HOST": os.environ["DJANGO_DB_HOST"],
+            "PORT": os.environ.get("DJANGO_DB_PORT") or "5432",
+            "CONN_MAX_AGE": int(os.environ.get("DJANGO_DB_CONN_MAX_AGE", "60")),
+        }
+    }
+elif DB_ENGINE == "sqlite":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.environ.get("DJANGO_DB_NAME") or BASE_DIR / "db.sqlite3",
         }
     }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+    raise ImproperlyConfigured("DJANGO_DB_ENGINE must be sqlite or postgresql.")
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -139,13 +149,25 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
     if origin.strip()
 ]
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-SECURE_SSL_REDIRECT = not DEBUG
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
-SECURE_HSTS_INCLUDE_SUBDOMINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+# Enable HSTS only after the production domain and every covered subdomain
+# are verified to serve HTTPS. Do not opt into browser preload by default.
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_HSTS_PRELOAD", False)
+
+# Trust forwarded HTTPS only when the configured reverse proxy controls this header.
+if env_bool("DJANGO_TRUST_PROXY", False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 PDF_UPLOAD_PATH = 'pdfs/user_uploads/'
 PDF_REPORT_PATH = 'pdfs/generated_reports/'

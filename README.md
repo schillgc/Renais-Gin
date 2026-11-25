@@ -128,3 +128,8 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for development workflow, database configur
 ## Status and license
 
 This repository is an independently maintained demonstration. It does not establish product authenticity, environmental outcomes, financial rewards, or endorsement by a brand or supplier. See [LICENSE](LICENSE) for the GNU Affero General Public License version 3.
+
+
+### Database and transport safeguards
+
+PostgreSQL configuration accepts only the `postgres`/`postgresql` backend names and fails at startup if the database name, user, password, or host is missing. The default local database remains SQLite. HTTPS redirects and secure cookies remain enabled outside DEBUG; HSTS and reverse-proxy header trust are opt-in until the actual host and proxy configuration are verified. The current green CI run is not a production deployment approval.
