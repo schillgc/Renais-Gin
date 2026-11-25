@@ -129,3 +129,67 @@ if __name__ == "__main__":
     import unittest
 
     unittest.main()
+
+
+    def test_database_backend_is_allowlisted_and_postgresql_requires_all_credentials(self):
+        default = self.load_settings({
+            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_ALLOWED_HOSTS": "localhost",
+        })
+        self.assertEqual(default.DATABASES["default"]["ENGINE"], "django.db.backends.sqlite3")
+
+        with self.assertRaisesRegex(ImproperlyConfigured, "PostgreSQL requires"):
+            self.load_settings({
+                "DJANGO_SECRET_KEY": "test-only-secret",
+                "DJANGO_ALLOWED_HOSTS": "localhost",
+                "DJANGO_DB_ENGINE": "postgresql",
+                "DJANGO_DB_NAME": "renais",
+            })
+
+        postgres = self.load_settings({
+            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_ALLOWED_HOSTS": "localhost",
+            "DJANGO_DB_ENGINE": "postgresql",
+            "DJANGO_DB_NAME": "renais",
+            "DJANGO_DB_USER": "app",
+            "DJANGO_DB_PASSWORD": "test-password",
+            "DJANGO_DB_HOST": "db.example.test",
+        })
+        self.assertEqual(postgres.DATABASES["default"]["ENGINE"], "django.db.backends.postgresql")
+        self.assertEqual(postgres.DATABASES["default"]["PORT"], "5432")
+
+        with self.assertRaisesRegex(ImproperlyConfigured, "must be sqlite or postgresql"):
+            self.load_settings({
+                "DJANGO_SECRET_KEY": "test-only-secret",
+                "DJANGO_ALLOWED_HOSTS": "localhost",
+                "DJANGO_DB_ENGINE": "mysql",
+            })
+
+    def test_hsts_and_proxy_trust_are_opt_in_but_baseline_headers_are_enabled(self):
+        settings = self.load_settings({
+            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_ALLOWED_HOSTS": "app.example.test",
+        })
+        self.assertEqual(settings.SECURE_HSTS_SECONDS, 0)
+        self.assertFalse(settings.SECURE_HSTS_INCLUDE_SUBDOMAINS)
+        self.assertFalse(settings.SECURE_HSTS_PRELOAD)
+        self.assertFalse(hasattr(settings, "SECURE_PROXY_SSL_HEADER"))
+        self.assertTrue(settings.SECURE_SSL_REDIRECT)
+        self.assertTrue(settings.SESSION_COOKIE_SECURE)
+        self.assertTrue(settings.CSRF_COOKIE_SECURE)
+        self.assertTrue(settings.SECURE_CONTENT_TYPE_NOSNIFF)
+        self.assertEqual(settings.X_FRAME_OPTIONS, "DENY")
+        self.assertEqual(settings.SECURE_REFERRER_POLICY, "strict-origin-when-cross-origin")
+
+        hardened = self.load_settings({
+            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_ALLOWED_HOSTS": "app.example.test",
+            "DJANGO_HSTS_SECONDS": "31536000",
+            "DJANGO_HSTS_INCLUDE_SUBDOMAINS": "true",
+            "DJANGO_HSTS_PRELOAD": "true",
+            "DJANGO_TRUST_PROXY": "true",
+        })
+        self.assertEqual(hardened.SECURE_HSTS_SECONDS, 31536000)
+        self.assertTrue(hardened.SECURE_HSTS_INCLUDE_SUBDOMAINS)
+        self.assertTrue(hardened.SECURE_HSTS_PRELOAD)
+        self.assertEqual(hardened.SECURE_PROXY_SSL_HEADER, ("HTTP_X_FORWARDED_PROTO", "https"))
