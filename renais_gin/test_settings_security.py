@@ -125,12 +125,6 @@ class SettingsSecurityContractTests(TestCase):
         )
 
 
-if __name__ == "__main__":
-    import unittest
-
-    unittest.main()
-
-
     def test_database_backend_is_allowlisted_and_postgresql_requires_all_credentials(self):
         default = self.load_settings({
             "DJANGO_SECRET_KEY": "test-only-secret",
@@ -193,3 +187,9 @@ if __name__ == "__main__":
         self.assertTrue(hardened.SECURE_HSTS_INCLUDE_SUBDOMAINS)
         self.assertTrue(hardened.SECURE_HSTS_PRELOAD)
         self.assertEqual(hardened.SECURE_PROXY_SSL_HEADER, ("HTTP_X_FORWARDED_PROTO", "https"))
+
+
+if __name__ == "__main__":
+    import unittest
+
+    unittest.main()
