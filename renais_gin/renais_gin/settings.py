@@ -98,7 +98,7 @@ if DB_ENGINE in {"postgres", "postgresql"}:
             "USER": os.environ["DJANGO_DB_USER"],
             "PASSWORD": os.environ["DJANGO_DB_PASSWORD"],
             "HOST": os.environ["DJANGO_DB_HOST"],
-            "PORT": os.environ.get("DJANGO_DB_PORT", "5432"),
+            "PORT": os.environ.get("DJANGO_DB_PORT") or "5432",
             "CONN_MAX_AGE": int(os.environ.get("DJANGO_DB_CONN_MAX_AGE", "60")),
         }
     }
