@@ -83,7 +83,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'renais_gin.wsgi.application'
 
-DB_ENGINE = os.environ.get("DJANGO_DB_ENGINE", "sqlite").strip().lower()
+DB_ENGINE = os.environ.get("DJANGO_DB_ENGINE", "sqlite").strip().lower() or "sqlite"
 if DB_ENGINE in {"postgres", "postgresql"}:
     required_db_values = ("DJANGO_DB_NAME", "DJANGO_DB_USER", "DJANGO_DB_PASSWORD", "DJANGO_DB_HOST")
     missing_db_values = [name for name in required_db_values if not os.environ.get(name)]
