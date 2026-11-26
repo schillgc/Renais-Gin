@@ -1,0 +1,134 @@
+name: Full dependency validation
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - "requirements.txt"
+      - "renais_gin/**"
+      - ".github/workflows/full-dependency-validation.yml"
+  push:
+    branches: [master]
+    paths:
+      - "requirements.txt"
+      - "renais_gin/**"
+      - ".github/workflows/full-dependency-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-dependencies-\${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-dependency-stack:
+    name: Install, import, and test every pinned dependency
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DJANGO_SECRET_KEY: ci-only-not-a-deployment-secret
+      DJANGO_DEBUG: "true"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      DJANGO_DB_ENGINE: sqlite
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      # Use the official CPU-only wheel so this validation does not fetch CUDA runtimes.
+      - name: Install pinned CPU-only PyTorch
+        run: python -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu "torch==2.8.0"
+
+      - name: Install every other pinned project dependency
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path("requirements.txt").read_text(encoding="utf-8").splitlines()
+          selected = [line for line in source if line.strip().lower().split("==", 1)[0] != "torch"]
+          if len(selected) == len(source):
+              raise SystemExit("The pinned torch dependency was not found.")
+          if sum(line.strip().lower().startswith("torch==") for line in source) != 1:
+              raise SystemExit("Expected exactly one pinned torch dependency.")
+          Path("/tmp/renais-gin-full-requirements.txt").write_text(
+              "\n".join(selected) + "\n", encoding="utf-8"
+          )
+          PY
+          python -m pip install --no-cache-dir -r /tmp/renais-gin-full-requirements.txt
+
+      - name: Verify all exact requirements and dependency consistency
+        run: |
+          python -m pip check
+          python - <<'PY'
+          from importlib.metadata import version
+          from pathlib import Path
+          from packaging.requirements import Requirement
+
+          for raw in Path("requirements.txt").read_text(encoding="utf-8").splitlines():
+              line = raw.strip()
+              if not line or line.startswith("#"):
+                  continue
+              requirement = Requirement(line)
+              installed = version(requirement.name)
+              if requirement.specifier and installed not in requirement.specifier:
+                  raise SystemExit(
+                      f"{requirement.name}: expected {requirement.specifier}, got {installed}"
+                  )
+              print(f"{requirement.name}=={installed}")
+          PY
+
+      - name: Import every pinned integration and runtime package
+        run: |
+          python - <<'PY'
+          import celery
+          import crispy_forms
+          import debug_toolbar
+          import django
+          import django_extensions
+          import django_filters
+          import drf_yasg
+          import gunicorn
+          import numpy
+          import pandas
+          import PIL
+          import psycopg2
+          import qrcode
+          import redis
+          import reportlab
+          import rest_framework
+          import sklearn
+          import sentence_transformers
+          import torch
+          import transformers
+          import web3
+          import whitenoise
+
+          print("All pinned package imports succeeded.")
+          print("Django:", django.get_version())
+          print("PyTorch:", torch.__version__)
+          print("scikit-learn:", sklearn.__version__)
+          print("sentence-transformers:", sentence_transformers.__version__)
+          print("web3.py:", web3.__version__)
+          PY
+
+      - name: Compile and check Django project
+        working-directory: renais_gin
+        run: |
+          python -m compileall -q core renais_gin
+          python manage.py check --settings=renais_gin.test_settings
+          python manage.py makemigrations --check --dry-run --settings=renais_gin.test_settings
+
+      - name: Run domain test suite with the full dependency stack
+        working-directory: renais_gin
+        run: python manage.py test core --settings=renais_gin.test_settings --verbosity 2
