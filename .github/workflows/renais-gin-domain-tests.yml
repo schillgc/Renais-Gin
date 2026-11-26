@@ -42,9 +42,57 @@ jobs:
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
-      - name: Install the Django domain-test runtime
-        run: python -m pip install "Django==5.2.19" "Pillow==13.0.0" "qrcode==8.2"
+      - name: Build focused dependency set from project requirements
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          wanted = {"Django", "Pillow", "qrcode", "numpy", "redis", "reportlab", "gunicorn"}
+          requirements = Path("requirements.txt").read_text(encoding="utf-8").splitlines()
+          selected = []
+          for raw in requirements:
+              line = raw.strip()
+              if not line or line.startswith("#"):
+                  continue
+              name = line.split("==", 1)[0].split(">=", 1)[0].split("<=", 1)[0].strip()
+              if name in wanted:
+                  selected.append(line)
+                  wanted.remove(name)
+          if wanted:
+              raise SystemExit("Missing required CI dependencies: " + ", ".join(sorted(wanted)))
+          Path("/tmp/renais-gin-ci-requirements.txt").write_text(
+              "\\n".join(selected) + "\\n", encoding="utf-8"
+          )
+          print("\\n".join(selected))
+          PY
+      - name: Install the project-pinned domain and server dependencies
+        run: python -m pip install -r /tmp/renais-gin-ci-requirements.txt
+      - name: Verify dependency imports and installed versions
+        run: |
+          python - <<'PY'
+          import django
+          import gunicorn
+          import numpy
+          import redis
+          import reportlab
+          from PIL import Image
+          import qrcode
+
+          print("Django:", django.get_version())
+          print("Gunicorn:", gunicorn.__version__)
+          print("NumPy:", numpy.__version__)
+          print("Redis:", redis.__version__)
+          print("ReportLab:", reportlab.Version)
+          print("Pillow:", Image.__version__)
+          print("qrcode:", qrcode.__version__ if hasattr(qrcode, "__version__") else "imported")
+          PY
+      - name: Check installed dependency consistency
+        run: python -m pip check
       - name: Compile the maintained Django application
         run: python -m compileall -q core renais_gin
+      - name: Run Django system checks
+        run: python manage.py check --settings=renais_gin.test_settings
       - name: Run migrations and domain integrity tests in memory
         run: python manage.py test core --settings=renais_gin.test_settings --verbosity 2
+      - name: Verify Gunicorn can load the WSGI application
+        run: gunicorn --check-config --config python:gunicorn.config.Config renais_gin.wsgi:application
