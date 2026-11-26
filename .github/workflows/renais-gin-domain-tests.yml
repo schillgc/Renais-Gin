@@ -61,9 +61,9 @@ jobs:
           if wanted:
               raise SystemExit("Missing required CI dependencies: " + ", ".join(sorted(wanted)))
           Path("/tmp/renais-gin-ci-requirements.txt").write_text(
-              "\\n".join(selected) + "\\n", encoding="utf-8"
+              "\n".join(selected) + "\n", encoding="utf-8"
           )
-          print("\\n".join(selected))
+          print("\n".join(selected))
           PY
       - name: Install the project-pinned domain and server dependencies
         run: python -m pip install -r /tmp/renais-gin-ci-requirements.txt
