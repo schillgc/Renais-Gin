@@ -122,6 +122,20 @@ jobs:
           print("web3.py:", web3.__version__)
           PY
 
+      - name: Check production deployment security configuration
+        working-directory: renais_gin
+        env:
+          DJANGO_SECRET_KEY: ci-only-deployment-check-key-long-enough-for-django-security-validation
+          DJANGO_DEBUG: "false"
+          DJANGO_ALLOWED_HOSTS: renais-ci.example.test
+          DJANGO_DB_ENGINE: sqlite
+          DJANGO_DB_NAME: /tmp/renais-gin-deployment-check.sqlite3
+          DJANGO_SECURE_SSL_REDIRECT: "true"
+          DJANGO_SESSION_COOKIE_SECURE: "true"
+          DJANGO_CSRF_COOKIE_SECURE: "true"
+          DJANGO_HSTS_SECONDS: "31536000"
+        run: python manage.py check --deploy --fail-level ERROR
+
       - name: Compile and check Django project
         working-directory: renais_gin
         run: |
