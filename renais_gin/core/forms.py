@@ -42,10 +42,17 @@ class PledgeSubmissionForm(forms.ModelForm):
         cleaned = super().clean()
         pledge_text = (cleaned.get('pledge_text') or '').strip()
         impact_plan = (cleaned.get('impact_plan') or '').strip()
+
         if len(pledge_text) < 20:
             self.add_error('pledge_text', 'Describe your pledge in at least 20 characters.')
+        elif len(pledge_text) > 2000:
+            self.add_error('pledge_text', 'Pledge must contain no more than 2,000 characters.')
+
         if len(impact_plan) < 20:
             self.add_error('impact_plan', 'Describe your impact plan in at least 20 characters.')
+        elif len(impact_plan) > 4000:
+            self.add_error('impact_plan', 'Impact plan must contain no more than 4,000 characters.')
+
         cleaned['pledge_text'] = pledge_text
         cleaned['impact_plan'] = impact_plan
         return cleaned
