@@ -48,7 +48,7 @@ jobs:
           from pathlib import Path
 
           wanted = {"Django", "Pillow", "qrcode", "numpy", "redis", "reportlab", "gunicorn"}
-          requirements = Path("requirements.txt").read_text(encoding="utf-8").splitlines()
+          requirements = Path("../requirements.txt").read_text(encoding="utf-8").splitlines()
           selected = []
           for raw in requirements:
               line = raw.strip()
