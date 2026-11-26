@@ -148,7 +148,12 @@ def validate_pledge(request, pledge_id):
                 messages.error(request, 'You have already validated this pledge.')
                 return redirect('core:dashboard')
 
-            approval = request.POST.get('approval') == 'true'
+            approval_value = request.POST.get('approval')
+            if approval_value not in ('true', 'false'):
+                messages.error(request, 'Choose whether to approve or reject this pledge.')
+                return redirect('core:dashboard')
+            approval = approval_value == 'true'
+
             comments = request.POST.get('comments', '')
             PledgeVote.objects.create(
                 pledge=pledge,

@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 
-from .forms import PDFUploadForm
+from .forms import PDFUploadForm, PledgeSubmissionForm
 from .models import Bottle, CommunityCircle, KarmaPledge, MovementMetrics, PledgeVote
 
 
@@ -130,6 +130,48 @@ class PledgeReviewIntegrityTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(KarmaPledge.objects.exists())
+
+    def test_pledge_form_enforces_server_side_character_limits(self):
+        form = PledgeSubmissionForm(data={
+            "pledge_text": "p" * 2001,
+            "impact_plan": "i" * 20,
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("2,000 characters", form.errors["pledge_text"][0])
+
+        form = PledgeSubmissionForm(data={
+            "pledge_text": "p" * 20,
+            "impact_plan": "i" * 4001,
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("4,000 characters", form.errors["impact_plan"][0])
+
+    def test_malformed_vote_values_do_not_become_rejections(self):
+        pledge = KarmaPledge.objects.create(
+            submission_id="TEST-PLEDGE-INVALID-VOTE",
+            user=self.author,
+            bottle=self.bottle,
+            pledge_text="A test pledge",
+            impact_plan="A test plan",
+            status="needs_review",
+        )
+        self.client.force_login(self.reviewers[0])
+        url = reverse("core:validate_pledge", args=[pledge.pk])
+
+        for payload in ({}, {"approval": "yes"}, {"approval": "TRUE"}):
+            with self.subTest(payload=payload):
+                response = self.client.post(url, payload)
+                self.assertEqual(response.status_code, 302)
+                self.assertFalse(
+                    PledgeVote.objects.filter(pledge=pledge, voter=self.reviewers[0]).exists()
+                )
+
+        pledge.refresh_from_db()
+        self.assertEqual(pledge.approvals, 0)
+        self.assertEqual(pledge.status, "needs_review")
+        self.assertEqual(pledge.validations, [])
 
     def test_same_user_cannot_submit_two_pledges_for_one_bottle(self):
         KarmaPledge.objects.create(
