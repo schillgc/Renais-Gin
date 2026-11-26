@@ -95,4 +95,4 @@ jobs:
       - name: Run migrations and domain integrity tests in memory
         run: python manage.py test core --settings=renais_gin.test_settings --verbosity 2
       - name: Verify Gunicorn can load the WSGI application
-        run: gunicorn --check-config --config python:gunicorn.config.Config renais_gin.wsgi:application
+        run: gunicorn --check-config renais_gin.wsgi:application
