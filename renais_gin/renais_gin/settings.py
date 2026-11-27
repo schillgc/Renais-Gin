@@ -28,6 +28,10 @@ if not SECRET_KEY or not SECRET_KEY.strip():
     raise ImproperlyConfigured(
         "DJANGO_SECRET_KEY must be set to a non-empty value."
     )
+if len(SECRET_KEY) < 50 or len(set(SECRET_KEY)) < 5:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY must be at least 50 characters and contain at least 5 distinct characters."
+    )
 
 DEBUG = env_bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = [
