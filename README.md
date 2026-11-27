@@ -1,7 +1,7 @@
 # Renais Gin
 
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
-[![Django 6.1.3](https://img.shields.io/badge/django-5.2.19-green)](https://www.djangoproject.com/)
+[![Django 6.1.3](https://img.shields.io/badge/django-6.1.3-green)](https://www.djangoproject.com/)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue)](https://www.gnu.org/licenses/agpl-3.0.html)
 
 Renais Gin is a Django prototype for registering bottle records, submitting sustainability pledges, reviewing pledges as a community, and viewing stored aggregate metrics. It is not a production verification or payments platform: submitted claims and product data are not independently verified, and the application does not call an AI model, write to a blockchain, or issue rebates.
