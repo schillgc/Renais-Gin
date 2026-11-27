@@ -157,7 +157,7 @@ class SettingsSecurityContractTests(TestCase):
         }
         with self.assertRaisesRegex(
             ImproperlyConfigured,
-            "DJANGO_DB_ENGINE=postgresql is required when DJANGO_DEBUG is false",
+            "DJANGO_DB_ENGINE=postgresql (or postgres) is required when DJANGO_DEBUG is false",
         ):
             self.load_settings(production_environment, test_database=False)
 
@@ -221,6 +221,23 @@ class SettingsSecurityContractTests(TestCase):
             },
         )
         self.assertTrue(postgres.DATABASES["default"]["CONN_HEALTH_CHECKS"])
+
+        default_tls = self.load_settings(
+            {
+                **production_environment,
+                "DJANGO_DB_ENGINE": "postgresql",
+                "DJANGO_DB_NAME": "renais",
+                "DJANGO_DB_USER": "app",
+                "DJANGO_DB_PASSWORD": "test-password",
+                "DJANGO_DB_HOST": "db.example.test",
+            },
+            test_database=False,
+        )
+        self.assertEqual(
+            default_tls.DATABASES["default"]["OPTIONS"],
+            {"sslmode": "verify-full"},
+        )
+        self.assertEqual(default_tls.DATABASES["default"]["CONN_MAX_AGE"], 60)
 
         with self.assertRaisesRegex(ImproperlyConfigured, "must be sqlite or postgresql"):
             self.load_settings(
