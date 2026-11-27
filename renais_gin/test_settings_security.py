@@ -6,6 +6,7 @@ It is deliberately not a replacement for Django system, API, or deployment tests
 """
 
 import os
+import secrets
 import sys
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
@@ -16,6 +17,9 @@ from unittest.mock import patch
 
 class ImproperlyConfigured(Exception):
     """Minimal stand-in for Django's configuration exception."""
+
+
+TEST_SECRET_KEY = secrets.token_urlsafe(64)
 
 
 class SettingsSecurityContractTests(TestCase):
@@ -56,13 +60,25 @@ class SettingsSecurityContractTests(TestCase):
                 with self.assertRaises(ImproperlyConfigured):
                     self.load_settings(environment)
 
+    def test_secret_key_requires_minimum_length_and_character_diversity(self):
+        for value, expected in (
+            ("x" * 49, "at least 50 characters"),
+            ("x" * 80, "at least 5 distinct characters"),
+        ):
+            with self.subTest(expected=expected):
+                with self.assertRaisesRegex(ImproperlyConfigured, expected):
+                    self.load_settings({
+                        "DJANGO_SECRET_KEY": value,
+                        "DJANGO_ALLOWED_HOSTS": "localhost",
+                    })
+
     def test_debug_defaults_to_false_and_production_hosts_are_required(self):
         with self.assertRaises(ImproperlyConfigured):
-            self.load_settings({"DJANGO_SECRET_KEY": "test-only-secret"})
+            self.load_settings({"DJANGO_SECRET_KEY": TEST_SECRET_KEY})
 
         settings = self.load_settings(
             {
-                "DJANGO_SECRET_KEY": "test-only-secret",
+                "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
                 "DJANGO_ALLOWED_HOSTS": "app.example.test",
             }
         )
@@ -72,7 +88,7 @@ class SettingsSecurityContractTests(TestCase):
     def test_debug_mode_without_hosts_is_limited_to_loopback(self):
         settings = self.load_settings(
             {
-                "DJANGO_SECRET_KEY": "test-only-secret",
+                "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
                 "DJANGO_DEBUG": "true",
             }
         )
@@ -84,7 +100,7 @@ class SettingsSecurityContractTests(TestCase):
             with self.subTest(value=value):
                 settings = self.load_settings(
                     {
-                        "DJANGO_SECRET_KEY": "test-only-secret",
+                        "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
                         "DJANGO_DEBUG": value,
                         "DJANGO_ALLOWED_HOSTS": "localhost",
                     }
@@ -96,7 +112,7 @@ class SettingsSecurityContractTests(TestCase):
             with self.subTest(value=value):
                 settings = self.load_settings(
                     {
-                        "DJANGO_SECRET_KEY": "test-only-secret",
+                        "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
                         "DJANGO_DEBUG": value,
                         "DJANGO_ALLOWED_HOSTS": "localhost",
                     }
@@ -107,7 +123,7 @@ class SettingsSecurityContractTests(TestCase):
         with self.assertRaises(ImproperlyConfigured):
             self.load_settings(
                 {
-                    "DJANGO_SECRET_KEY": "test-only-secret",
+                    "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
                     "DJANGO_DEBUG": "perhaps",
                     "DJANGO_ALLOWED_HOSTS": "localhost",
                 }
@@ -116,7 +132,7 @@ class SettingsSecurityContractTests(TestCase):
     def test_allowed_hosts_are_trimmed_and_empty_entries_removed(self):
         settings = self.load_settings(
             {
-                "DJANGO_SECRET_KEY": "test-only-secret",
+                "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
                 "DJANGO_ALLOWED_HOSTS": " app.example.com, api.example.com ,, ",
             }
         )
@@ -127,12 +143,12 @@ class SettingsSecurityContractTests(TestCase):
 
     def test_database_backend_is_allowlisted_and_postgresql_requires_all_credentials(self):
         default = self.load_settings({
-            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
             "DJANGO_ALLOWED_HOSTS": "localhost",
         })
         self.assertEqual(default.DATABASES["default"]["ENGINE"], "django.db.backends.sqlite3")
         blank_backend = self.load_settings({
-            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
             "DJANGO_ALLOWED_HOSTS": "localhost",
             "DJANGO_DB_ENGINE": "",
         })
@@ -140,14 +156,14 @@ class SettingsSecurityContractTests(TestCase):
 
         with self.assertRaisesRegex(ImproperlyConfigured, "PostgreSQL requires"):
             self.load_settings({
-                "DJANGO_SECRET_KEY": "test-only-secret",
+                "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
                 "DJANGO_ALLOWED_HOSTS": "localhost",
                 "DJANGO_DB_ENGINE": "postgresql",
                 "DJANGO_DB_NAME": "renais",
             })
 
         postgres = self.load_settings({
-            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
             "DJANGO_ALLOWED_HOSTS": "localhost",
             "DJANGO_DB_ENGINE": "postgresql",
             "DJANGO_DB_NAME": "renais",
@@ -160,14 +176,14 @@ class SettingsSecurityContractTests(TestCase):
 
         with self.assertRaisesRegex(ImproperlyConfigured, "must be sqlite or postgresql"):
             self.load_settings({
-                "DJANGO_SECRET_KEY": "test-only-secret",
+                "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
                 "DJANGO_ALLOWED_HOSTS": "localhost",
                 "DJANGO_DB_ENGINE": "mysql",
             })
 
     def test_hsts_and_proxy_trust_are_opt_in_but_baseline_headers_are_enabled(self):
         settings = self.load_settings({
-            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
             "DJANGO_ALLOWED_HOSTS": "app.example.test",
         })
         self.assertEqual(settings.SECURE_HSTS_SECONDS, 0)
@@ -182,7 +198,7 @@ class SettingsSecurityContractTests(TestCase):
         self.assertEqual(settings.SECURE_REFERRER_POLICY, "strict-origin-when-cross-origin")
 
         hardened = self.load_settings({
-            "DJANGO_SECRET_KEY": "test-only-secret",
+            "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
             "DJANGO_ALLOWED_HOSTS": "app.example.test",
             "DJANGO_HSTS_SECONDS": "31536000",
             "DJANGO_HSTS_INCLUDE_SUBDOMAINS": "true",
