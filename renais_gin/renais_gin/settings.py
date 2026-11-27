@@ -91,7 +91,7 @@ DB_ENGINE = os.environ.get("DJANGO_DB_ENGINE", "sqlite").strip().lower() or "sql
 if DB_ENGINE == "sqlite":
     if not DEBUG:
         raise ImproperlyConfigured(
-            "DJANGO_DB_ENGINE=postgresql is required when DJANGO_DEBUG is false."
+            "DJANGO_DB_ENGINE=postgresql (or postgres) is required when DJANGO_DEBUG is false."
         )
     DATABASES = {
         "default": {
