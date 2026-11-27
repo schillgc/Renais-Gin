@@ -128,8 +128,13 @@ jobs:
           DJANGO_SECRET_KEY: ci-only-deployment-check-key-long-enough-for-django-security-validation
           DJANGO_DEBUG: "false"
           DJANGO_ALLOWED_HOSTS: renais-ci.example.test
-          DJANGO_DB_ENGINE: sqlite
-          DJANGO_DB_NAME: /tmp/renais-gin-deployment-check.sqlite3
+          DJANGO_DB_ENGINE: postgresql
+          DJANGO_DB_NAME: renais-ci-check
+          DJANGO_DB_USER: renais-ci-check
+          DJANGO_DB_PASSWORD: ci-only-not-a-real-password
+          DJANGO_DB_HOST: db.example.test
+          DJANGO_DB_PORT: "5432"
+          DJANGO_DB_SSLMODE: verify-full
           DJANGO_SECURE_SSL_REDIRECT: "true"
           DJANGO_SESSION_COOKIE_SECURE: "true"
           DJANGO_CSRF_COOKIE_SECURE: "true"
