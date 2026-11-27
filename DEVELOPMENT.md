@@ -31,7 +31,7 @@ source .venv/bin/activate
 Install the minimal runtime used by the domain-test workflow:
 
 ```bash
-python -m pip install "Django==5.2.19" "Pillow==13.0.0" "qrcode==8.2"
+python -m pip install "Django==6.1.3" "Pillow==13.0.0" "qrcode==8.2"
 ```
 
 The full repository `requirements.txt` includes additional packages for optional or inactive integrations, including large machine-learning libraries. They are not required for the core app or its domain tests. Install `reportlab==4.4.4` if you want to exercise PDF report generation. Install the pinned PostgreSQL driver from `requirements.txt` only when using PostgreSQL.
@@ -54,7 +54,7 @@ $env:DJANGO_DEBUG = "true"
 $env:DJANGO_ALLOWED_HOSTS = "localhost,127.0.0.1,testserver"
 ```
 
-The app uses a local SQLite database by default. To use PostgreSQL, set `DJANGO_DB_ENGINE` to `django.db.backends.postgresql` and configure `DJANGO_DB_NAME`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`, `DJANGO_DB_HOST`, and `DJANGO_DB_PORT`. Never use production credentials in a development environment.
+The local path uses SQLite only with `DJANGO_DEBUG=true` (as in the commands above). A non-debug process must set `DJANGO_DB_ENGINE=postgresql` and configure `DJANGO_DB_NAME`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`, and `DJANGO_DB_HOST`; the backend value is `postgresql` or `postgres`, not a Django engine import path. `DJANGO_DB_PORT` defaults to `5432`. Connections require certificate verification: `DJANGO_DB_SSLMODE` defaults to `verify-full` and also accepts `verify-ca`; use `DJANGO_DB_SSLROOTCERT` for a provider CA bundle. Unverified TLS modes are rejected. Never use production credentials in a development environment.
 
 ## Run the application
 
