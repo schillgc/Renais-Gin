@@ -32,7 +32,7 @@ jobs:
       run:
         working-directory: renais_gin
     env:
-      DJANGO_SECRET_KEY: ci-only-not-a-deployment-secret
+      DJANGO_SECRET_KEY: ci-only-deployment-check-key-long-enough-for-django-security-validation
       DJANGO_DEBUG: "true"
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
     steps:

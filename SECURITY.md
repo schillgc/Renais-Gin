@@ -14,11 +14,11 @@ Please avoid accessing or modifying data that is not yours. This project has no 
 
 ## Deployment secrets and settings
 
-The Django application requires a non-empty `DJANGO_SECRET_KEY` and fails at startup if it is missing. Use a unique, high-entropy value for each environment, store it in a secrets manager, and never commit it.
+The Django application requires a non-empty `DJANGO_SECRET_KEY` of at least 50 characters with at least 5 distinct characters and fails at startup if the key is absent or weak. Generate a unique high-entropy key for each environment with `python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'`, store it in a secrets manager, and never commit it.
 
 | Variable | Requirement |
 |---|---|
-| `DJANGO_SECRET_KEY` | Required; generate a unique secret and rotate it if exposed. |
+| `DJANGO_SECRET_KEY` | Required; 50+ characters and 5+ distinct characters. Generate a unique key per environment and rotate it if exposed. |
 | `DJANGO_DEBUG` | Defaults to `false`; accepted values are `true`/`false`, `yes`/`no`, `on`/`off`, and `1`/`0`. |
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames; explicitly set production hosts. |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | Optional comma-separated trusted origins for deployments that need them. |
