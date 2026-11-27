@@ -157,7 +157,7 @@ class SettingsSecurityContractTests(TestCase):
         }
         with self.assertRaisesRegex(
             ImproperlyConfigured,
-            "DJANGO_DB_ENGINE=postgresql (or postgres) is required when DJANGO_DEBUG is false",
+            r"DJANGO_DB_ENGINE=postgresql \(or postgres\) is required when DJANGO_DEBUG is false",
         ):
             self.load_settings(production_environment, test_database=False)
 
