@@ -25,7 +25,16 @@ TEST_SECRET_KEY = secrets.token_urlsafe(64)
 class SettingsSecurityContractTests(TestCase):
     settings_path = Path(__file__).resolve().parent / "renais_gin" / "settings.py"
 
-    def load_settings(self, environment):
+    def load_settings(self, environment, *, test_database=True):
+        test_database_environment = {
+            "DJANGO_DB_ENGINE": "postgresql",
+            "DJANGO_DB_NAME": "renais-test",
+            "DJANGO_DB_USER": "renais-test",
+            "DJANGO_DB_PASSWORD": "test-only-database-password",
+            "DJANGO_DB_HOST": "db.example.test",
+        } if test_database else {}
+        environment = {**test_database_environment, **environment}
+
         django = ModuleType("django")
         django.__path__ = []
         django_core = ModuleType("django.core")
@@ -141,28 +150,106 @@ class SettingsSecurityContractTests(TestCase):
         )
 
 
-    def test_database_backend_is_allowlisted_and_postgresql_requires_all_credentials(self):
-        default = self.load_settings({
+    def test_sqlite_is_debug_only_and_postgresql_requires_all_credentials(self):
+        production_environment = {
             "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
             "DJANGO_ALLOWED_HOSTS": "localhost",
-        })
-        self.assertEqual(default.DATABASES["default"]["ENGINE"], "django.db.backends.sqlite3")
-        blank_backend = self.load_settings({
-            "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
-            "DJANGO_ALLOWED_HOSTS": "localhost",
-            "DJANGO_DB_ENGINE": "",
-        })
-        self.assertEqual(blank_backend.DATABASES["default"]["ENGINE"], "django.db.backends.sqlite3")
+        }
+        with self.assertRaisesRegex(
+            ImproperlyConfigured,
+            r"DJANGO_DB_ENGINE=postgresql \(or postgres\) is required when DJANGO_DEBUG is false",
+        ):
+            self.load_settings(production_environment, test_database=False)
+
+        local = self.load_settings(
+            {
+                **production_environment,
+                "DJANGO_DEBUG": "true",
+                "DJANGO_DB_ENGINE": "sqlite",
+            },
+            test_database=False,
+        )
+        self.assertEqual(local.DATABASES["default"]["ENGINE"], "django.db.backends.sqlite3")
+
+        blank_backend = self.load_settings(
+            {
+                **production_environment,
+                "DJANGO_DEBUG": "true",
+                "DJANGO_DB_ENGINE": "",
+            },
+            test_database=False,
+        )
+        self.assertEqual(
+            blank_backend.DATABASES["default"]["ENGINE"],
+            "django.db.backends.sqlite3",
+        )
 
         with self.assertRaisesRegex(ImproperlyConfigured, "PostgreSQL requires"):
-            self.load_settings({
-                "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
-                "DJANGO_ALLOWED_HOSTS": "localhost",
+            self.load_settings(
+                {
+                    **production_environment,
+                    "DJANGO_DB_ENGINE": "postgresql",
+                    "DJANGO_DB_NAME": "renais",
+                },
+                test_database=False,
+            )
+
+        postgres = self.load_settings(
+            {
+                **production_environment,
                 "DJANGO_DB_ENGINE": "postgresql",
                 "DJANGO_DB_NAME": "renais",
-            })
+                "DJANGO_DB_USER": "app",
+                "DJANGO_DB_PASSWORD": "test-password",
+                "DJANGO_DB_HOST": "db.example.test",
+                "DJANGO_DB_PORT": "6432",
+                "DJANGO_DB_SSLMODE": "verify-full",
+                "DJANGO_DB_SSLROOTCERT": "/etc/ssl/certs/renais-ca.pem",
+            },
+            test_database=False,
+        )
+        self.assertEqual(
+            postgres.DATABASES["default"]["ENGINE"],
+            "django.db.backends.postgresql",
+        )
+        self.assertEqual(postgres.DATABASES["default"]["PORT"], "6432")
+        self.assertEqual(
+            postgres.DATABASES["default"]["OPTIONS"],
+            {
+                "sslmode": "verify-full",
+                "sslrootcert": "/etc/ssl/certs/renais-ca.pem",
+            },
+        )
+        self.assertTrue(postgres.DATABASES["default"]["CONN_HEALTH_CHECKS"])
 
-        postgres = self.load_settings({
+        default_tls = self.load_settings(
+            {
+                **production_environment,
+                "DJANGO_DB_ENGINE": "postgresql",
+                "DJANGO_DB_NAME": "renais",
+                "DJANGO_DB_USER": "app",
+                "DJANGO_DB_PASSWORD": "test-password",
+                "DJANGO_DB_HOST": "db.example.test",
+            },
+            test_database=False,
+        )
+        self.assertEqual(
+            default_tls.DATABASES["default"]["OPTIONS"],
+            {"sslmode": "verify-full"},
+        )
+        self.assertEqual(default_tls.DATABASES["default"]["CONN_MAX_AGE"], 60)
+
+        with self.assertRaisesRegex(ImproperlyConfigured, "must be sqlite or postgresql"):
+            self.load_settings(
+                {
+                    **production_environment,
+                    "DJANGO_DB_ENGINE": "mysql",
+                },
+                test_database=False,
+            )
+
+    def test_postgresql_rejects_unverified_tls_and_invalid_connection_bounds(self):
+        environment = {
             "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
             "DJANGO_ALLOWED_HOSTS": "localhost",
             "DJANGO_DB_ENGINE": "postgresql",
@@ -170,16 +257,33 @@ class SettingsSecurityContractTests(TestCase):
             "DJANGO_DB_USER": "app",
             "DJANGO_DB_PASSWORD": "test-password",
             "DJANGO_DB_HOST": "db.example.test",
-        })
-        self.assertEqual(postgres.DATABASES["default"]["ENGINE"], "django.db.backends.postgresql")
-        self.assertEqual(postgres.DATABASES["default"]["PORT"], "5432")
+        }
+        invalid_settings = (
+            {"DJANGO_DB_SSLMODE": "disable"},
+            {"DJANGO_DB_SSLMODE": "prefer"},
+            {"DJANGO_DB_SSLMODE": "require"},
+            {"DJANGO_DB_PORT": "not-a-port"},
+            {"DJANGO_DB_PORT": "70000"},
+            {"DJANGO_DB_PORT": "0"},
+            {"DJANGO_DB_CONN_MAX_AGE": "not-an-integer"},
+            {"DJANGO_DB_CONN_MAX_AGE": "-1"},
+            {"DJANGO_DB_CONN_MAX_AGE": "3601"},
+        )
+        for invalid in invalid_settings:
+            with self.subTest(invalid=invalid), self.assertRaises(ImproperlyConfigured):
+                self.load_settings(
+                    {**environment, **invalid},
+                    test_database=False,
+                )
 
-        with self.assertRaisesRegex(ImproperlyConfigured, "must be sqlite or postgresql"):
-            self.load_settings({
-                "DJANGO_SECRET_KEY": TEST_SECRET_KEY,
-                "DJANGO_ALLOWED_HOSTS": "localhost",
-                "DJANGO_DB_ENGINE": "mysql",
-            })
+        verify_ca = self.load_settings(
+            {**environment, "DJANGO_DB_SSLMODE": "verify-ca"},
+            test_database=False,
+        )
+        self.assertEqual(
+            verify_ca.DATABASES["default"]["OPTIONS"],
+            {"sslmode": "verify-ca"},
+        )
 
     def test_hsts_and_proxy_trust_are_opt_in_but_baseline_headers_are_enabled(self):
         settings = self.load_settings({

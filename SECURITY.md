@@ -22,13 +22,13 @@ The Django application requires a non-empty `DJANGO_SECRET_KEY` of at least 50 c
 | `DJANGO_DEBUG` | Defaults to `false`; accepted values are `true`/`false`, `yes`/`no`, `on`/`off`, and `1`/`0`. |
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames; explicitly set production hosts. |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | Optional comma-separated trusted origins for deployments that need them. |
-| `DJANGO_DB_*` | SQLite is the local default. PostgreSQL accepts only `postgres`/`postgresql` and requires database name, user, password, and host. |
+| `DJANGO_DB_*` | SQLite is permitted only with `DJANGO_DEBUG=true`. Non-debug deployments must select `postgresql`/`postgres`, provide database name, user, password, and host, and verify the server certificate with `verify-ca` or `verify-full` (default `verify-full`). `DJANGO_DB_SSLROOTCERT` may specify the provider CA bundle. |
 | `DJANGO_TRUST_PROXY` | Defaults to false. Set true only when a trusted reverse proxy controls `X-Forwarded-Proto`. |
 | `DJANGO_HSTS_SECONDS` | Defaults to 0 until the production domain and HTTPS are verified. |
 | `DJANGO_HSTS_INCLUDE_SUBDOMAINS` | Defaults to false; enable only after every covered subdomain is HTTPS-ready. |
 | `DJANGO_HSTS_PRELOAD` | Defaults to false; do not enable without a deliberate domain-wide preload review. |
 
-With `DEBUG` disabled, the settings enable HTTPS redirection, secure session and CSRF cookies, and baseline response headers. HSTS remains off until the production domain and covered subdomains are verified. A production deployment must still provide correct TLS termination, host configuration, trusted origins, database configuration, static/media storage, backups, monitoring, and operational review. The repository does not provide a complete production deployment.
+With `DEBUG` disabled, the settings require PostgreSQL and reject SQLite, require certificate-verified PostgreSQL TLS, and enable HTTPS redirection, secure session and CSRF cookies, and baseline response headers. HSTS remains off until the production domain and covered subdomains are verified. A production deployment must still provide correct TLS termination, host configuration, trusted origins, database configuration, static/media storage, backups, monitoring, and operational review. The repository does not provide a complete production deployment.
 
 The root `.env.example` contains placeholders, not usable secrets. The app reads environment variables directly and does not load a `.env` file automatically. Do not reuse production credentials in local development.
 

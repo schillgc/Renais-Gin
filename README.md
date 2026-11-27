@@ -1,7 +1,7 @@
 # Renais Gin
 
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
-[![Django 5.2.19](https://img.shields.io/badge/django-5.2.19-green)](https://www.djangoproject.com/)
+[![Django 6.1.3](https://img.shields.io/badge/django-6.1.3-green)](https://www.djangoproject.com/)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue)](https://www.gnu.org/licenses/agpl-3.0.html)
 
 Renais Gin is a Django prototype for registering bottle records, submitting sustainability pledges, reviewing pledges as a community, and viewing stored aggregate metrics. It is not a production verification or payments platform: submitted claims and product data are not independently verified, and the application does not call an AI model, write to a blockchain, or issue rebates.
@@ -25,7 +25,7 @@ The metrics are database aggregates, not independently audited impact results. I
 
 ## Quick start
 
-The application and its domain tests use Python 3.12. The default local database is SQLite.
+The application and its domain tests use Python 3.12. Local SQLite is available only with `DJANGO_DEBUG=true`; non-debug settings require PostgreSQL with certificate-verifying TLS.
 
 1. Create and activate a virtual environment:
 
@@ -41,7 +41,7 @@ The application and its domain tests use Python 3.12. The default local database
 2. Install the small runtime used by the app's domain-test workflow:
 
    ```bash
-   python -m pip install "Django==5.2.19" "Pillow==13.0.0" "qrcode==8.2"
+   python -m pip install "Django==6.1.3" "Pillow==13.0.0" "qrcode==8.2"
    ```
 
    PDF report generation also requires `reportlab` (`python -m pip install "reportlab==4.4.4"`). The full `requirements.txt` includes additional, resource-intensive packages for integrations that are not active features of this prototype.
@@ -72,7 +72,7 @@ The application and its domain tests use Python 3.12. The default local database
 
    Open `http://127.0.0.1:8000/`. The dashboard requires an account; create one at `/signup/` or create an administrator with `python manage.py createsuperuser`.
 
-The settings module reads environment variables directly; it does not load a `.env` file. Never use a development secret in production. PostgreSQL can be selected with the `DJANGO_DB_*` variables documented in [`.env.example`](.env.example); install the PostgreSQL driver from `requirements.txt` when using that database.
+The settings module reads environment variables directly; it does not load a `.env` file. Never use a development secret in production. A non-debug deployment must set `DJANGO_DB_ENGINE=postgresql` and `DJANGO_DB_NAME`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`, and `DJANGO_DB_HOST`. PostgreSQL connections default to `DJANGO_DB_SSLMODE=verify-full`; `verify-ca` is also accepted when the provider requires a private CA without hostname verification. Set `DJANGO_DB_SSLROOTCERT` for a provider CA bundle when needed. Unverified and plaintext TLS modes are rejected. Install the PostgreSQL driver from `requirements.txt` when using that database.
 
 ## Main routes
 
@@ -132,4 +132,4 @@ This repository is an independently maintained demonstration. It does not establ
 
 ### Database and transport safeguards
 
-PostgreSQL configuration accepts only the `postgres`/`postgresql` backend names and fails at startup if the database name, user, password, or host is missing. The default local database remains SQLite. HTTPS redirects and secure cookies remain enabled outside DEBUG; HSTS and reverse-proxy header trust are opt-in until the actual host and proxy configuration are verified. The current green CI run is not a production deployment approval.
+SQLite is permitted only with `DJANGO_DEBUG=true`. Every non-debug process must select `DJANGO_DB_ENGINE=postgresql` (or `postgres`) and provide database name, user, password, and host. PostgreSQL requires server-certificate verification (`verify-ca` or `verify-full`), defaulting to `verify-full` with hostname verification. Port and connection lifetime values are validated. HTTPS redirects and secure cookies remain enabled outside DEBUG; HSTS and reverse-proxy header trust are opt-in until the actual host and proxy configuration are verified. The current green CI run is not a production deployment approval.
